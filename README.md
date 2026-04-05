@@ -4,9 +4,9 @@
 CodePath WEB103 Final Project
 
 ## Designed and developed by: 
-  Besher Kitaz
-  Daniel Burnayev
-  Gloriele Mendoza
+  Besher Kitaz,
+  Daniel Burnayev,
+  Gloriele Mendoza,
   Mario Nolasco Cortez
 
 🔗 Link to deployed app:
