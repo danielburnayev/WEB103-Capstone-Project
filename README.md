@@ -3,23 +3,27 @@
 [your app name here]
 CodePath WEB103 Final Project
 
-Designed and developed by: [your names here]
+## Designed and developed by: 
+  Besher Kitaz
+  Daniel Burnayev
+  Gloriele Mendoza
+  Mario Nolasco Cortez
 
 🔗 Link to deployed app:
 
-About
+## About
 Description and Purpose
 [text goes here]
 
-Inspiration
+## Inspiration
 [text goes here]
 
-Tech Stack
+## Tech Stack
 Frontend:
 
 Backend:
 
-Features
+## Features
 [Name of Feature 1]
 [short description goes here]
 
