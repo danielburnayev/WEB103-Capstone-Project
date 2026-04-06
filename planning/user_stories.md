@@ -13,7 +13,7 @@ A user who lives in a shared household and participates in the household by comp
 
 [👉🏾👉🏾👉🏾 Include at least at least 10 user stories in this format:]
 
-1. As a [user role], I want to [what], so that [why].
+As a [user role], I want to [what], so that [why].
 
 1. As a [roommate], I want to [view a chore list], so that [I know what tasks need to be completed].
 2. As a [roommate], I want to [mark chores as completed], so that [my other roommates know the task has been finished].
