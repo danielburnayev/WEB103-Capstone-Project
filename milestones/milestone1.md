@@ -15,11 +15,11 @@ This unit, be sure to complete all tasks listed below. To complete a task, place
  [x] In planning/user_stories.md: use 1-3 unique user roles in your user stories  
  [x] In this document, complete all thre questions in the Reflection section below
 Reflection
-1. What went well during this unit?
+1. What went well during this unit?  
    [👉🏾👉🏾👉🏾 We were able to work as a group to come up with a project idea and fill out the requirements for Milestone 1.]
 
-3. What were some challenges your group faced in this unit?
+2. What were some challenges your group faced in this unit?  
    [👉🏾👉🏾👉🏾 It was a little bit difficult to contact everyone and communicate since we are all in different timezones. However, we were able to make it work by messaging on Slack.]
 
-5. What additional support will you need in upcoming units as you continue to work on your final project?
-6. [👉🏾👉🏾👉🏾 So far, we have not needed additional support. We may have questions on how to implement our features, so being able to ask for help on Slack would likely be a good support for the future.]
+3. What additional support will you need in upcoming units as you continue to work on your final project?  
+   [👉🏾👉🏾👉🏾 So far, we have not needed additional support. We may have questions on how to implement our features, so being able to ask for help on Slack would likely be a good support for the future.]
