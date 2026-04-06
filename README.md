@@ -16,7 +16,7 @@ Description and Purpose
 [A shared web app where roommates/friend groups can share group info and responsibilities for all to see and satisfy. Used to have one repository to consolodate responsibilities, duties, and other group needs.]
 
 ## Inspiration
-[text goes here]
+[We were inspired to create this app because it can be difficult for people living together to delegate chores and expenses, especially when living with random roommates. This app is designed to make it easier to communicate and plan who will be responsible for what chore.]
 
 ## Tech Stack
 Frontend: React
