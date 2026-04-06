@@ -1,6 +1,6 @@
 # WEB103-Capstone-Project
 
-[your app name here]
+[Roommate App]
 CodePath WEB103 Final Project
 
 ## Designed and developed by: 
@@ -13,15 +13,15 @@ CodePath WEB103 Final Project
 
 ## About
 Description and Purpose
-[text goes here]
+[A shared web app where roommates/friend groups can share group info and responsibilities for all to see and satisfy. Used to have one repository to consolodate responsibilities, duties, and other group needs.]
 
 ## Inspiration
 [text goes here]
 
 ## Tech Stack
-Frontend:
+Frontend: React
 
-Backend:
+Backend: Node.js
 
 ## Features
 [Name of Feature 1]
