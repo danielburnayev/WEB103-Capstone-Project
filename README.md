@@ -25,32 +25,33 @@ Frontend: React
 Backend: Node.js
 
 ## Features
-[Chore management system]
+
+### Chore management system
 [System that allows user to create chores, including title, due date, who created the chore, who the chore is assigned to, and a description.]
 
 [gif goes here]
 
-[Roommate group system]
+### Roommate group system
 [System that allows users to sign in and join groups under a household, along with other roommates/users.]
 
 [gif goes here]
 
-[Bill splitting & Payment tracking]
+### Bill splitting & Payment tracking
 [Enables users to create bills (e.g., rent, utilities) and split costs among roommates. The app tracks how much each person owes and whether they have paid.]
 
 [gif goes here]
 
-[Fridge inventory tracker]
+### Fridge inventory tracker
 [Allows roommates to add and manage individual or shared food items in the fridge. Users can track quantities, expiration dates, and ownership (shared or personal items)]
 
 [gif goes here]
 
-[Grocery list collaboration]
+### Grocery list collaboration
 [Allows multiple users to add items to a shared grocery list. Roommates can indicate priority or mark items as purchased to avoid duplicates.]
 
 [gif goes here]
 
-[Comments on chores]
+### Comments on chores
 [Users can comment their status on chores, which can be viewed by the other roommates in their household group.]
 
 [gif goes here]
