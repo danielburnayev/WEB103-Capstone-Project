@@ -1,6 +1,6 @@
 # WEB103-Capstone-Project
 
-CodePath WEB103 Final Project: Roommate App
+Roommate App
 
 ## Designed and developed by: 
   Besher Kitaz,  
