@@ -2,8 +2,7 @@
 
 Roommate App
 
-## Designed and developed by: 
-  Besher Kitaz,  
+## Designed and developed by:  
   Daniel Burnayev,  
   Gloriele Mendoza,  
   Mario Nolasco Cortez  
