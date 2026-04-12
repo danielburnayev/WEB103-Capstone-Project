@@ -19,12 +19,12 @@ This unit, be sure to complete all tasks listed below. To complete a task, place
 
 ### 1. What went well during this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[We were able to agree on a project idea and discuss how to implement it. We were also able to get the required features done.]
 
 ### 2. What were some challenges your group faced in this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[We were initially struggling with how to execute our project. We considered using cookies, but decided to do a hybrid with standard auth for the project.]
 
 ### 3. What additional support will you need in upcoming units as you continue to work on your final project?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[We were able to ask the slack channel for advice for our project. I think having more time to work on the project in class and continued availability to ask questions in slack would be helpful.]
