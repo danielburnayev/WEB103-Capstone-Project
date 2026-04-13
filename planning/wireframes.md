@@ -6,21 +6,22 @@ Reference the Creating an Entity Relationship Diagram final project guide in the
 
 [👉🏾👉🏾👉🏾 List the pages you expect to have in your app, with a ⭐ next to pages you have wireframed]
 
+[CodePath WEB103 Wireframe.pdf](https://github.com/user-attachments/files/26664460/CodePath.WEB103.Wireframe.pdf)
 
 ## Wireframe 1: [Join Calendar Page]
 
-[👉🏾👉🏾👉🏾 include wireframe 1]
+[Wireframe 1 is in the pdf above]
 
 ## Wireframe 2: [Calendar Page]
 
-[👉🏾👉🏾👉🏾 include wireframe 2]
+[Wireframe 2 is in the pdf above]
 
 ## Wireframe 3: [Landing Page]
 
-[👉🏾👉🏾👉🏾 include wireframe 3]
+[Wireframe 3 is in the pdf above]
 
 ## Wireframe 4: [Create Calendar Page]
 
-[👉🏾👉🏾👉🏾 include wireframe 4]
+[Wireframe 4 is in the pdf above]
 
 [👉🏾👉🏾👉🏾 include more wireframes as desired]
