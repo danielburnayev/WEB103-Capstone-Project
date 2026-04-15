@@ -1,6 +1,6 @@
-# WEB103-Capstone-Project
+# Shared Calendar App
 
-Roommate App
+Our CodePath WEB103 project
 
 ## Designed and developed by:  
   Daniel Burnayev,  
@@ -12,41 +12,36 @@ Roommate App
 ## About
 
 ## Description and Purpose
-A shared web app where roommates/friend groups can share group info and responsibilities for all to see and satisfy. Used to have one repository to consolodate responsibilities, duties, and other group needs.
+A shared web app where any group of people can join into a shared calendar and show their availabilities via. calendar events to make planning with large groups easier.
 
 ## Inspiration
-We were inspired to create this app because it can be difficult for people living together to delegate chores, clean-up, and expenses, especially when living with random roommates. This app is designed to make it easier to communicate and plan who will be responsible for what chore.
+Since we all have problems scheduling events/meetups with our friends when things get busy, we wanted to create a website with a good UI (like Google Calendar) where all of us could jot down our availabilities and easily figure out when we're available.  
 
 ## Tech Stack
 **Frontend:** React
 **Backend:** Node.js
+**Database:** Supabase/Render
 
 ## Features
 
-### Chore management system
-System that allows user to create chores, including title, due date, who created the chore, who the chore is assigned to, and a description.
-[gif goes here]
+### Allow guest access
+To make sure no one has to give their personal emails or other data and for the sake of a better user experience, those that want don't want to sign up from the get-go can join calendars (with limited access).
 
-### Roommate group system
-System that allows users to sign in and join groups under a household, along with other roommates/users.
-[gif goes here]
+### Temporary calendars
+For those that don't want this to be long term, a user can create a temporary calendar, which will remove itself within a short amount of time. Perfect for guest users who only want to make quick scheduling decisions with their group and don't want to keep the calendar around for future events. Also allows guests all access to adding/creating/altering events.
 
-### Bill splitting & Payment tracking
-Enables users to create bills (e.g., rent, utilities) and split costs among roommates. The app tracks how much each person owes and whether they have paid.
-[gif goes here]
+### Accessing a group calendar with only a 6 digit code
+To make accessing calendars simple, we are using a Kahoot-inspired code system to allow people to join a desired calendar without having to give anything else (no username or password).
 
-### Fridge inventory tracker
-[Allows roommates to add and manage individual or shared food items in the fridge. Users can track quantities, expiration dates, and ownership (shared or personal items)]
-[gif goes here]
+### Add individual events in a shared calendar
+Once inside a shared calendar, you can put down when you're available or not to via. Google-Calendar-like calendar events.
 
-### Grocery list collaboration
-[Allows multiple users to add items to a shared grocery list. Roommates can indicate priority or mark items as purchased to avoid duplicates.]
-[gif goes here]
+### Add multiple events at once
+If you have an event that happens consistently over a long period of time, signed-in users (non-guests, sorry) can add and duplicate their event such that it repeats within the calendar.
 
-### Comments on chores
-[Users can comment their status on chores, which can be viewed by the other roommates in their household group.]
-[gif goes here]
+### Import your Google Calendar into a shared calendar
+We'll work on this if we have enough time, so this might not be included, but if you have a lot of VERY different events in your existing Google Calender(s), you can export them and import them within a shared calendar and automatically include them without manually adding its events.
 
-[ADDITIONAL FEATURES GO HERE - ADD ALL FEATURES HERE IN THE FORMAT ABOVE; you will check these off and add gifs as you complete them]
+
 Installation Instructions
 [instructions go here]
