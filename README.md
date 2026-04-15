@@ -34,7 +34,7 @@ For those that don't want this to be long term, a user can create a temporary ca
 To make accessing calendars simple, we are using a Kahoot-inspired code system to allow people to join a desired calendar without having to give anything else (no username or password).
 
 ### Add individual events in a shared calendar
-Once inside a shared calendar, you can put down when you're available or not to via. Google-Calendar-like calendar events.
+Once inside a shared calendar, you can put down when you're available or not to via. Google-Calendar.
 
 ### Add multiple events at once
 If you have an event that happens consistently over a long period of time, signed-in users (non-guests, sorry) can add and duplicate their event such that it repeats within the calendar.
