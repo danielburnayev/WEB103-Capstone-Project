@@ -15,9 +15,9 @@ A user who lives in a shared household and participates in the household by comp
 
 As a [user role], I want to [what], so that [why].
 
-1. As a [roommate], I want to [view a chore list], so that [I know what tasks need to be completed].
-2. As a [roommate], I want to [mark chores as completed], so that [my other roommates know the task has been finished].
-3. As a [roommate], I want to [add items to a shared grocery list], so that [everyone knows what needs to be purchased].
+1. As a user, I want to join a calandar, so that if someone already created the calandar, I can just join the existing one.
+2. As a user, I want to create a shared calandar, so that I can invite others and find days where everyone's available.
+3. As a user, I want to be able to join a calandar without signing up, so that it's easy to join if it's a one off thing.
 4. As a [roommate], I want to [mark grocery items as purchased], so that [my roommates can avoid buying duplicates].
 5. As a [roommate], I want to [create shared bills], so that [expenses can be tracked within the household].
 6. As a [roommate], I want to [view how much I owe on a bill], so that [I can pay my share on time].
