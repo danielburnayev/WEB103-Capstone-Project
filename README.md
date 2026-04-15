@@ -18,7 +18,7 @@ A shared web app where any group of people can join into a shared calendar and s
 Since we all have problems scheduling events/meetups with our friends when things get busy, we wanted to create a website with a good UI (like Google Calendar) where all of us could jot down our availabilities and easily figure out when we're available.  
 
 ## Tech Stack
-**Frontend:** React
+**Frontend:** React & Tailwind CSS
 **Backend:** Node.js
 **Database:** Supabase/Render
 
