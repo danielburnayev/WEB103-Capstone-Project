@@ -16,7 +16,7 @@ export default function CalendarUserSidebar() {
             <div className="h-[80%] w-full">
                 <h2 className="font-bold h-[5%]">Other Users:</h2>
                 <div className={"flex flex-col items-start justify-start gap-5 overflow-y-auto w-full h-[95%] pt-1"}>
-                    {Array.from({ length: 15 }, (_, i) => i + 1).map((i) => (
+                    {Array.from({ length: 4 }, (_, i) => i + 1).map((i) => (
                         <CalendarUserDisplay key={i} username={`User ${i}`} color="#007bff" displayingYou={false} />
                     ))} {/* will be replaced with a list of actual users */}
                 </div>

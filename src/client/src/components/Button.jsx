@@ -7,7 +7,8 @@ export default function Button(props) {
         <button className="border p-1 rounded-xl cursor-pointer text-sm" 
                 id={id}
                 onMouseOver={() => showButtonIsHovered()}
-                onMouseOut={() => resetButtonStyle()}>
+                onMouseOut={() => resetButtonStyle()}
+                onClick={props.onClick}>
 
             {text}
 

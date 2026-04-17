@@ -1,43 +1,121 @@
+import { useState } from "react"; 
 import Button from "../components/Button.jsx";
 import { times, daysOfWeek, months } from "../services/calendar-data.js";
 
 export default function Calendar() {
-    let todaysDate = new Date();
-    let currMonth = months[todaysDate.getMonth()];
-    let currYear = todaysDate.getFullYear();
-    let currDay = todaysDate.getDay();
+    const [currDate, setCurrDate] = useState(new Date());
+    const [currTotalMinutes, setCurrTotalMinutes] = useState(60 * currDate.getHours() + currDate.getMinutes());
 
-    function getDayNDaysFromPresent(days) {
+    const [focusedDate, setFocusedDate] = useState(new Date());
+    const [year, setYear] = useState(currDate.getFullYear());
+    const [month, setMonth] = useState(months[currDate.getMonth()]);
+    const [day, setDay] = useState(currDate.getDay());
+    const [weekDates, setWeekDates] = useState(getDatesOfWeek(new Date()));
+    const [isWeekView, setIsWeekView] = useState(true);
+    const [displayDays, setDisplayDays] = useState(daysOfWeek);
+
+    setInterval(() => {
+        const newDate = new Date();
+
+        setCurrDate(newDate);
+        setCurrTotalMinutes(60 * newDate.getHours() + newDate.getMinutes());
+    }, 1000 * 60); // updates every minute
+    
+
+    function getDatesOfWeek(selectDate) {
+        let dates = [];
         let dummyDate = new Date();
-        dummyDate.setTime(todaysDate.getTime() + (days * 24 * 60 * 60 * 1000));
 
-        return dummyDate.getDate();
+        for (let i = 0; i < 7; i++) {
+            dummyDate.setTime(selectDate.getTime() + ((i - day) * 24 * 60 * 60 * 1000));
+            dates.push(structuredClone(dummyDate));
+        }
+
+        return dates;
     }
+
+    function changeFocusedTime(daysChanged=0, millisecondsChanged=0) {
+        if (daysChanged == 0 && millisecondsChanged == 0) {return;}
+
+        const newFocusedDate = new Date(focusedDate);
+        newFocusedDate.setTime(newFocusedDate.getTime() + ((daysChanged != 0) ? (daysChanged * 24 * 60 * 60 * 1000) : millisecondsChanged));
+
+        setFocusedDate(newFocusedDate);
+        setYear(newFocusedDate.getFullYear());
+        setMonth(months[newFocusedDate.getMonth()]);
+        setDay(newFocusedDate.getDay());
+        setWeekDates((isWeekView) ? getDatesOfWeek(newFocusedDate) : [newFocusedDate]);
+        if (!isWeekView) {setDisplayDays([daysOfWeek[newFocusedDate.getDay()]]);}
+    }
+
+    function changeCalendarView(isWeek) {
+        setIsWeekView(isWeek);
+
+        if (!isWeek) {
+            setWeekDates([focusedDate]);
+            setDisplayDays([daysOfWeek[focusedDate.getDay()]]);
+        } else {
+            setWeekDates(getDatesOfWeek(focusedDate));
+            setDisplayDays(daysOfWeek);
+        }
+    }
+
+    function isCurrDayInFocusedWeek() {
+        let inDisplayedWeek = false;
+
+        for (let i = 0; i < weekDates.length; i++) {
+            inDisplayedWeek ||= currDate.getDate() === weekDates[i].getDate()
+        }
+
+        return currDate.getFullYear() === focusedDate.getFullYear() && 
+                currDate.getMonth() === focusedDate.getMonth() && 
+                inDisplayedWeek;
+    }
+
+    function isCurrDateFocusedDate() {
+        return currDate.getFullYear() === focusedDate.getFullYear() && 
+                currDate.getMonth() === focusedDate.getMonth() && 
+                currDate.getDay() === focusedDate.getDay() && 
+                currDate.getDate() === focusedDate.getDate();
+    }
+
+    function trackKeyPress(keyPressEvent) {
+        if (keyPressEvent.key === "ArrowLeft") {changeFocusedTime(isWeekView ? -7 : -1);} 
+        else if (keyPressEvent.key === "ArrowRight") {changeFocusedTime(isWeekView ? 7 : 1);}
+        else if (keyPressEvent.key === "w") {changeCalendarView(true);}
+        else if (keyPressEvent.key === "d") {changeCalendarView(false);}
+        else if (keyPressEvent.key === "t") {changeFocusedTime(0, currDate.getTime() - focusedDate.getTime());}
+    }
+
+    document.body.onkeydown = (event) => trackKeyPress(event);
 
     return (
         <div className={"relative h-full w-[87.5%] bg-gray-300 rounded-xl"}>
             <div className={"flex flex-row h-[10%] border-b"}> {/* top portion (buttons, dates, month, year) */}
                 <div className={"flex flex-col items-center justify-center w-[7.5%] h-full"}> {/* calendar buttons container */}
                     <div className={"flex flex-row items-center justify-center"}>
-                        <Button text="<-" id="back-calendar-btn"/>
-                        <Button text="->" id="forward-calendar-btn"/>
+                        <Button text="<-" id="back-calendar-btn" onClick={() => changeFocusedTime(isWeekView ? -7 : -1)}/>
+                        <Button text="->" id="forward-calendar-btn" onClick={() => changeFocusedTime(isWeekView ? 7 : 1)}/>
+                        <Button text="Now" id="now-calendar-btn" onClick={() => changeFocusedTime(0, currDate.getTime() - focusedDate.getTime())}/>
                     </div>
 
                     <div className={"flex flex-row items-center justify-center"}>
-                        <Button text="Day" id="day-calendar-btn"/>
-                        <Button text="Week" id="week-calendar-btn"/>
+                        <Button text="Day" id="day-calendar-btn" onClick={() => changeCalendarView(false)}/>
+                        <Button text="Week" id="week-calendar-btn" onClick={() => changeCalendarView(true)}/>
                     </div>
                 </div>
 
                 <div className="flex flex-col items-center justify-start w-[92.5%] h-full"> {/* month, year, and dates/days display */}
-                    <h2 className="font-bold">{currMonth} {currYear}</h2>
-                    <div className={"flex flex-row items-center justify-around w-full h-full"}> 
-                        {daysOfWeek.map((day, index) => (
-                            <div className="flex flex-col items-center justify-end w-[14.285%] h-full">    
-                                <p key={index}>{day}</p>
+                    <h2 className="font-bold">{month} {year}</h2> {/* month and year */}
+                    <div className={"flex flex-row items-center justify-around w-full h-full"}> {/* dates/days */}
+                        {displayDays.map((day, index) => (
+                            <div key={`day-date-${index}`} className="flex flex-col items-center justify-end w-[14.285%] h-full">    
+                                <p key={`day-${index}`}>{day}</p>
                                 <p key={`date-${index}`} 
-                                   className={`${index === currDay ? 'bg-blue-300' : 'bg-transparent'} rounded-full aspect-square text-center`}>
-                                        {getDayNDaysFromPresent(index - currDay)}
+                                   className={`${(weekDates[index].getDate() === currDate.getDate() && 
+                                                  weekDates[index].getMonth() === currDate.getMonth() && 
+                                                  weekDates[index].getFullYear() === currDate.getFullYear()) ? 'bg-blue-300' : 'bg-transparent'} rounded-full aspect-square text-center`}>
+                                        {weekDates[index].getDate()}
                                 </p>
                             </div>
                         ))}
@@ -48,28 +126,41 @@ export default function Calendar() {
             <div className={"relative flex flex-row h-[90%] overflow-y-scroll"}> {/* calendar content (times, events) */}
                 <div className={"flex flex-col items-center justify-start w-[7.5%] h-full gap-5"}> {/* time slots container */}
                     {times.map((time, index) => (
-                        <div className="absolute left-0 pb-5" style={{top: `calc(44px * ${index})`}}> 
-                            <div className={"w-[87.5vw] border-[0.25px] border-gray-100"}/> {/* horizontal guidelines for hour-long representation and leading to corresponding to specific time labels */}
-                            <p key={index} className={"select-none"}>{time}</p> {/* time labels */}
+                        <div key={`time-container-${index}`} className="absolute left-0 pb-5" style={{top: `calc(44px * ${index})`}}> 
+                            <div key={`horz-${index}`} className={"w-[87.5vw] border-[0.25px] border-gray-100"}/> {/* horizontal guidelines for hour-long representation and leading to corresponding to specific time labels */}
+                            <p key={`time-${index}`} className={"select-none ml-2"}>{time}</p> {/* time labels */}
                         </div>
                     ))}
                 </div>
 
-                <div className={"flex flex-row items-center justify-center w-[92.5%] h-[1056px]"}> {/* events container */}
-                    <div className={"relative w-[14.285%] h-full"}></div> 
-                    <div className={"relative w-[14.285%] h-full"}></div>
-                    <div className={"relative w-[14.285%] h-full"}></div>
-                    <div className={"relative w-[14.285%] h-full"}></div>
-                    <div className={"relative w-[14.285%] h-full"}></div>
-                    <div className={"relative w-[14.285%] h-full"}></div>
-                    <div className={"relative w-[14.285%] h-full"}></div>
+                {(isWeekView) ? 
+                    <div className={"flex flex-row items-center justify-center w-[92.5%] h-[1056px]"}> {/* events container */}
+                        <div className={"relative w-[14.285%] h-full"}></div> 
+                        <div className={"relative w-[14.285%] h-full"}></div>
+                        <div className={"relative w-[14.285%] h-full"}></div>
+                        <div className={"relative w-[14.285%] h-full"}></div>
+                        <div className={"relative w-[14.285%] h-full"}></div>
+                        <div className={"relative w-[14.285%] h-full"}></div>
+                        <div className={"relative w-[14.285%] h-full"}></div>
+                    </div>
+                    :
+                    <div className={"flex flex-row items-center justify-center w-[92.5%] h-[1056px]"}> {/* events container */}
+                        <div className={"relative w-full h-full"}></div> 
+                    </div>
+                }
+
+                {((isWeekView && isCurrDayInFocusedWeek()) || (!isWeekView && isCurrDateFocusedDate())) ? 
+                    <div className={`absolute ${isWeekView ? 'w-[13.21%]' : 'w-full'} border border-red-500 z-101`}
+                        style={{top: `${1056 * (currTotalMinutes / 1440)}px`, left: (isWeekView) ? `calc(7.5% + (${currDate.getDay()} * 13.21%))` : '7.5%'}}/> // current time display line
+                    :
+                    <></>
+                }
                 </div>
-            </div>
 
             <div className={"absolute top-0 left-[7.5%] h-full border-[0.5px] z-100"}/> {/* vertical line separating time slots from events */}
 
-            {Array.from({ length: 6 }, (_, i) => i + 1).map((i) => (
-                    <div key={i} className={"absolute top-[5%] h-[95%] border-[0.5px] z-100"} 
+            {Array.from({ length: (isWeekView) ? 6 : 0 }, (_, i) => i + 1).map((i) => (
+                    <div key={`vert ${i}`} className={"absolute top-[5%] h-[95%] border-[0.5px] z-100"} 
                         style={{left: `calc(7.5% + (${i} * 13.21%))`}}/>
             ))} {/* vertical lines making event boundaries clear */}
         </div>
