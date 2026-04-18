@@ -48,12 +48,13 @@ export default function Calendar() {
         if (!isWeekView) {setDisplayDays([daysOfWeek[newFocusedDate.getDay()]]);}
     }
 
-    function changeCalendarView(isWeek) {
+    function changeCalendarView(isWeek, providedDate = undefined) {
         setIsWeekView(isWeek);
 
         if (!isWeek) {
-            setWeekDates([focusedDate]);
-            setDisplayDays([daysOfWeek[focusedDate.getDay()]]);
+            const appliedDate = providedDate === undefined ? focusedDate : providedDate;
+            setWeekDates([appliedDate]);
+            setDisplayDays([daysOfWeek[appliedDate.getDay()]]);
         } else {
             setWeekDates(getDatesOfWeek(focusedDate));
             setDisplayDays(daysOfWeek);
@@ -87,6 +88,11 @@ export default function Calendar() {
         else if (keyPressEvent.key === "t") {changeFocusedTime(0, currDate.getTime() - focusedDate.getTime());}
     }
 
+    function clickOnDateLabel(weekdayIndex, givenDate) {
+        changeFocusedTime(weekdayIndex - currDate.getDay()); 
+        changeCalendarView(false, givenDate);
+    }
+
     document.body.onkeydown = (event) => trackKeyPress(event);
 
     return (
@@ -96,7 +102,7 @@ export default function Calendar() {
                     <div className={"flex flex-row items-center justify-center"}>
                         <Button text="<-" id="back-calendar-btn" onClick={() => changeFocusedTime(isWeekView ? -7 : -1)}/>
                         <Button text="->" id="forward-calendar-btn" onClick={() => changeFocusedTime(isWeekView ? 7 : 1)}/>
-                        <Button text="Now" id="now-calendar-btn" onClick={() => changeFocusedTime(0, currDate.getTime() - focusedDate.getTime())}/>
+                        <Button text="Today" id="today-calendar-btn" onClick={() => changeFocusedTime(0, currDate.getTime() - focusedDate.getTime())}/>
                     </div>
 
                     <div className={"flex flex-row items-center justify-center"}>
@@ -109,7 +115,8 @@ export default function Calendar() {
                     <h2 className="font-bold">{month} {year}</h2> {/* month and year */}
                     <div className={"flex flex-row items-center justify-around w-full h-full"}> {/* dates/days */}
                         {displayDays.map((day, index) => (
-                            <div key={`day-date-${index}`} className="flex flex-col items-center justify-end w-[14.285%] h-full">    
+                            <div key={`day-date-${index}`} className="flex flex-col items-center justify-end w-[14.285%] h-full cursor-pointer hover:bg-gray-400"
+                                 onClick={() => {clickOnDateLabel(index, weekDates[index])}}>    
                                 <p key={`day-${index}`}>{day}</p>
                                 <p key={`date-${index}`} 
                                    className={`${(weekDates[index].getDate() === currDate.getDate() && 
@@ -135,23 +142,23 @@ export default function Calendar() {
 
                 {(isWeekView) ? 
                     <div className={"flex flex-row items-center justify-center w-[92.5%] h-[1056px]"}> {/* events container */}
-                        <div className={"relative w-[14.285%] h-full"}></div> 
-                        <div className={"relative w-[14.285%] h-full"}></div>
-                        <div className={"relative w-[14.285%] h-full"}></div>
-                        <div className={"relative w-[14.285%] h-full"}></div>
-                        <div className={"relative w-[14.285%] h-full"}></div>
-                        <div className={"relative w-[14.285%] h-full"}></div>
-                        <div className={"relative w-[14.285%] h-full"}></div>
+                        <CalendarDayColumn id="sunday-column" weekday={true}/>
+                        <CalendarDayColumn id="monday-column" weekday={true}/>
+                        <CalendarDayColumn id="tuesday-column" weekday={true}/>
+                        <CalendarDayColumn id="wednesday-column" weekday={true}/>
+                        <CalendarDayColumn id="thrusday-column" weekday={true}/>
+                        <CalendarDayColumn id="friday-column" weekday={true}/>
+                        <CalendarDayColumn id="saturday-column" weekday={true}/>
                     </div>
                     :
                     <div className={"flex flex-row items-center justify-center w-[92.5%] h-[1056px]"}> {/* events container */}
-                        <div className={"relative w-full h-full"}></div> 
+                        <CalendarDayColumn id="day-column" weekday={false}/>
                     </div>
                 }
 
                 {((isWeekView && isCurrDayInFocusedWeek()) || (!isWeekView && isCurrDateFocusedDate())) ? 
                     <div className={`absolute ${isWeekView ? 'w-[13.21%]' : 'w-full'} border border-red-500 z-101`}
-                        style={{top: `${1056 * (currTotalMinutes / 1440)}px`, left: (isWeekView) ? `calc(7.5% + (${currDate.getDay()} * 13.21%))` : '7.5%'}}/> // current time display line
+                        style={{top: `${1056 * (currTotalMinutes / 1440)}px`, left: (isWeekView) ? `calc(7.5% + (${currDate.getDay()} * 13.21%))` : '7.5%'}}/> // horz. current time display line
                     :
                     <></>
                 }
@@ -163,6 +170,65 @@ export default function Calendar() {
                     <div key={`vert ${i}`} className={"absolute top-[5%] h-[95%] border-[0.5px] z-100"} 
                         style={{left: `calc(7.5% + (${i} * 13.21%))`}}/>
             ))} {/* vertical lines making event boundaries clear */}
+        </div>
+    );
+}
+
+function CalendarDayColumn(props) {
+    const [creatingEvent, setCreatingEvent] = useState(false);
+    const [events, setEvents] = useState([]);
+    const [bottom, setBottom] = useState(undefined);
+
+    const id = props.id;
+
+    function startEventCreation(mouseEvent) {
+        let startPos = mouseEvent.nativeEvent.offsetY;
+
+        setCreatingEvent(true);
+
+        events.push({top: `${startPos}px`});
+        setBottom(startPos);
+        setEvents(events);
+    }
+
+    function createEvent(mouseEvent) {
+        changeEventSize(mouseEvent);
+        setCreatingEvent(false);
+    }
+
+    function changeEventSize(mouseEvent) {
+        if (!creatingEvent) {return;}
+
+        let endPos = mouseEvent.nativeEvent.offsetY;
+        let eventsCopy = structuredClone(events);
+        let currEventStyle = eventsCopy[eventsCopy.length - 1];
+        let currEventTop = parseInt(currEventStyle.top.substring(0, currEventStyle.top.length - 2));
+
+        if (endPos < currEventTop) {
+            currEventStyle.top = endPos + "px";
+            currEventStyle.height = (bottom - endPos) + "px";
+        }
+        else if (endPos > currEventTop) {
+            console.log("set");
+
+            currEventStyle.height = Math.abs(endPos - currEventTop) + "px";
+            setBottom(endPos);
+        }
+
+        eventsCopy[eventsCopy.length - 1] = currEventStyle;
+        setEvents(eventsCopy);
+    }
+
+    return (
+        <div className={`relative ${(props.weekday) ? "w-[14.285%]" : "w-full"} h-full`} id={id}
+             onMouseDown={(event) => startEventCreation(event)}
+             onMouseMove={(event) => changeEventSize(event)}
+             onMouseUp={(event) => createEvent(event)}
+            >
+            
+            {events.map((event, index) => (
+                <div key={`${id}-event-${index}`} className={"absolute w-full border bg-amber-300 pointer-events-none"} style={event}></div>
+            ))}
         </div>
     );
 }
