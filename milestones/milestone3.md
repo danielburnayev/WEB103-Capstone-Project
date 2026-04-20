@@ -14,23 +14,23 @@ You will need to reference the GitHub Project Management guide in the course por
 - [X] In your repo, update the status of issues in your project board.
 - [X] In your repo, create a GitHub Milestone for each final project unit, corresponding to each of the 5 milestones in your `milestones/` directory. 
   - [ ] Set the completion percentage of each milestone. The GitHub Milestone for this unit (Milestone 3 - Unit 7) should be 100% completed when you submit for full points.
-- [ ] In `readme.md`, check off the features you have completed in this unit by adding a ✅ emoji in front of the feature's name.
-  - [ ] Under each feature you have completed, include a GIF showing feature functionality.
-- [ ] In this documents, complete all five questions in the **Reflection** section below.
+- [X] In `readme.md`, check off the features you have completed in this unit by adding a ✅ emoji in front of the feature's name.
+  - [X] Under each feature you have completed, include a GIF showing feature functionality.
+- [X] In this documents, complete all five questions in the **Reflection** section below.
 
 ## Reflection
 
 ### 1. What went well during this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[Our group was able to finalize an idea and approach, as well as start outlining the tasks that need to get done.]
 
 ### 2. What were some challenges your group faced in this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[We struggled to make time to work on the project, but were able to discuss during lab time and outside of class. So we were able to get the outline done and figure out tasks.]
 
 ### Did you finish all of your tasks in your sprint plan for this week? If you did not finish all of the planned tasks, how would you prioritize the remaining tasks on your list?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[We did not finish all of the tasks on the list, but we are planning to prioritize based on most important functionality. We have a plan for how to work on the features more next week.]
 
 ### Which features and user stories would you consider “at risk”? How will you change your plan if those items remain “at risk”?
 
@@ -38,4 +38,4 @@ You will need to reference the GitHub Project Management guide in the course por
 
 ### 5. What additional support will you need in upcoming units as you continue to work on your final project?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[For now, our group is good with everything since we have a plan. We may ask questions in the Slack channel if anything comes up.]
