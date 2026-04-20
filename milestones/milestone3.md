@@ -13,7 +13,7 @@ You will need to reference the GitHub Project Management guide in the course por
 - [X] In your repo, create at least 5 issues from the features on your feature list.
 - [X] In your repo, update the status of issues in your project board.
 - [X] In your repo, create a GitHub Milestone for each final project unit, corresponding to each of the 5 milestones in your `milestones/` directory. 
-  - [ ] Set the completion percentage of each milestone. The GitHub Milestone for this unit (Milestone 3 - Unit 7) should be 100% completed when you submit for full points.
+  - [X] Set the completion percentage of each milestone. The GitHub Milestone for this unit (Milestone 3 - Unit 7) should be 100% completed when you submit for full points.
 - [X] In `readme.md`, check off the features you have completed in this unit by adding a ✅ emoji in front of the feature's name.
   - [X] Under each feature you have completed, include a GIF showing feature functionality.
 - [X] In this documents, complete all five questions in the **Reflection** section below.
@@ -34,7 +34,7 @@ You will need to reference the GitHub Project Management guide in the course por
 
 ### Which features and user stories would you consider “at risk”? How will you change your plan if those items remain “at risk”?
 
-[👉🏾👉🏾👉🏾 your answer here]
+[Right now, the issues we have are the most basic elements of our calendar app, so none of them are really at risk. Worst case, we may not be able to implement our cookies idea in time, or the sign-in optionis, but we will prioritize having all the requirements for the project and having users be able to join calendars and add events.]
 
 ### 5. What additional support will you need in upcoming units as you continue to work on your final project?
 
