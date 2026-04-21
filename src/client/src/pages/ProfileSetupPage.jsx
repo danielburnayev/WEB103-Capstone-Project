@@ -26,7 +26,7 @@ function ProfileSetupPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen">
       <main className="flex flex-col flex-1 items-center justify-center gap-10">
         <h2 className="text-3xl font-bold">Set up your profile</h2>
 
