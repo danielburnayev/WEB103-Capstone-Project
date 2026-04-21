@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LandingPage from './pages/LandingPage.jsx'
 import SharedCalendarPage from './pages/SharedCalendarPage.jsx'
-import './App.css'
 
 function App() {
-
   return (
-    <>
-      <SharedCalendarPage name="Shared Calendar" code="1D4-7JL" />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/calendar/:code" element={<SharedCalendarPage />} />
+        {/* Add new routes here */}
+      </Routes>
+    </BrowserRouter>
   )
 }
 
