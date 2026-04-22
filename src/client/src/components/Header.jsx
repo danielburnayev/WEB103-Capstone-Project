@@ -7,7 +7,7 @@ function Header({ navItems = [] }) {
           <button
             key={item.label}
             onClick={item.onClick}
-            className="text-gray-600 last:text-white last:bg-black last:px-3 last:py-2 last:rounded"
+            className="text-gray-600 cursor-pointer last:text-white last:bg-black last:px-3 last:py-2 last:rounded last:hover:opacity-85 transition"
           >
             {item.label}
           </button>

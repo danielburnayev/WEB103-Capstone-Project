@@ -17,7 +17,7 @@ function CreateCalendar({ onClose }) {
           placeholder="Calendar Name"
           className="border border-gray-300 rounded px-4 py-3"
         />
-        <button className="bg-black text-white px-7 py-3 rounded font-semibold">
+        <button className="bg-black text-white px-7 py-3 rounded font-semibold hover:opacity-80 transition">
           Create Calendar
         </button>
       </div>
