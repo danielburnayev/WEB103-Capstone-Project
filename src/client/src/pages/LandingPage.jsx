@@ -8,7 +8,7 @@ function LandingPage() {
   const [showCreateCalendar, setShowCreateCalendar] = useState(false);
 
   const landingNavItems = [
-    { label: "Sign Up", onClick: () => {} },
+    { label: "Sign In", onClick: () => navigate("/signin") },
     { label: "Join Calendar", onClick: () => navigate("/join") },
   ];
 
