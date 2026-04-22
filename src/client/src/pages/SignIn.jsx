@@ -1,8 +1,8 @@
 function SignIn() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-20 bg-gray-50">
+    <div className="flex flex-col items-center justify-center h-screen gap-20">
       <h1 className="text-3xl font-bold">Insync Calendar</h1>
-      <div className="flex flex-col gap-10 w-sm bg-gray-50 p-8 rounded shadow">
+      <div className="flex flex-col gap-10 w-sm p-8 rounded shadow">
         <div className="flex flex-col items-center gap-1">
           <h2 className="text-3xl font-bold">Welcome Back!</h2>
           <p className="text-gray-500">Sign in to your account</p>
