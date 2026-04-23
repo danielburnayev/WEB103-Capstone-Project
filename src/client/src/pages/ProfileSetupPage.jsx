@@ -18,10 +18,18 @@ function ProfileSetupPage() {
 
   const [username, setUsername] = useState("");
   const [selectedColor, setSelectedColor] = useState(colorOptions[4].value);
+  const [error, setError] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!username.trim()) return;
+    if (!username.trim()) {
+      setError("Please enter a username");
+      return;
+    }
+    setError("");
+
+    // TODO: Implement logic to save user profile and join calendar using the PIN
+
     navigate(`/calendar/${pin}`, { state: { username, color: selectedColor } });
   }
 
@@ -31,13 +39,17 @@ function ProfileSetupPage() {
         <h2 className="text-3xl font-bold">Set up your profile</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-10 w-full max-w-md px-6">
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="border border-gray-300 rounded px-4 py-3 text-center text-lg"
-          />
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              placeholder="Enter your name"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="border border-gray-300 rounded px-4 py-3 text-center text-lg shadow-sm"
+            />
+            {error && !username.trim() && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+
 
           <div className="flex flex-col items-center gap-6 w-full">
             <p className="text-xl font-semibold">Select your profile badge</p>
@@ -63,7 +75,7 @@ function ProfileSetupPage() {
 
           <button
             type="submit"
-            className="bg-black text-white py-3 rounded font-semibold px-7"
+            className={`bg-black text-white py-3 rounded font-semibold px-7 ${error && !username.trim() ? 'opacity-50' : 'hover:opacity-80'  }`}
           >
             Save
           </button>
