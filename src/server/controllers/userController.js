@@ -1,4 +1,4 @@
-const pool = require('../db')
+import { pool } from '../config/database.js'
 
 const getAllUsers = async (req, res) => {
   try {
@@ -58,4 +58,4 @@ const deleteUser = async (req, res) => {
   }
 }
 
-module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser }
+export { getAllUsers, getUserById, createUser, updateUser, deleteUser }

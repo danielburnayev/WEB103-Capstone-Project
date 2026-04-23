@@ -1,4 +1,4 @@
-const pool = require('../db')
+import { pool } from '../config/database.js'
 
 const getUsersInCalendar = async (req, res) => {
   try {
@@ -55,4 +55,4 @@ const removeUserFromCalendar = async (req, res) => {
   }
 }
 
-module.exports = { getUsersInCalendar, addUserToCalendar, updateCalendarUser, removeUserFromCalendar }
+export { getUsersInCalendar, addUserToCalendar, updateCalendarUser, removeUserFromCalendar }

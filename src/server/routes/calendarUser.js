@@ -1,11 +1,11 @@
-const express = require('express')
-const router = express.Router()
-const { getUsersInCalendar, addUserToCalendar, updateCalendarUser, removeUserFromCalendar } = require('../controllers/calendarUserController')
+import express from 'express'
+import { getUsersInCalendar, addUserToCalendar, updateCalendarUser, removeUserFromCalendar } from '../controllers/calendarUserController.js'
 
-// All scoped under /calendars/:calendar_id/users
+const router = express.Router()
+
 router.get('/:calendar_id/users', getUsersInCalendar)
 router.post('/:calendar_id/users', addUserToCalendar)
 router.put('/:calendar_id/users/:user_id', updateCalendarUser)
 router.delete('/:calendar_id/users/:user_id', removeUserFromCalendar)
 
-module.exports = router
+export default router

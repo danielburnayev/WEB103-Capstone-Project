@@ -1,4 +1,4 @@
-const pool = require('../db')
+import { pool } from '../config/database.js'
 
 const getAllCalendars = async (req, res) => {
   try {
@@ -58,4 +58,4 @@ const deleteCalendar = async (req, res) => {
   }
 }
 
-module.exports = { getAllCalendars, getCalendarById, createCalendar, updateCalendar, deleteCalendar }
+export { getAllCalendars, getCalendarById, createCalendar, updateCalendar, deleteCalendar }

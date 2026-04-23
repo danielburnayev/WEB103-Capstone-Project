@@ -1,14 +1,16 @@
-const express = require('express')
+import express from 'express'
+import dotenv from 'dotenv'
+import userRoutes from './routes/user.js'
+import calendarRoutes from './routes/calendar.js'
+import calendarUserRoutes from './routes/calendarUser.js'
+import eventRoutes from './routes/event.js'
+
+dotenv.config()
+
 const app = express()
 const PORT = process.env.PORT || 8080
 
 app.use(express.json())
-
-// Routes
-const userRoutes = require('./routes/user')
-const calendarRoutes = require('./routes/calendar')
-const calendarUserRoutes = require('./routes/calendarUser')
-const eventRoutes = require('./routes/event')
 
 app.use('/api/users', userRoutes)
 app.use('/api/calendars', calendarRoutes)
@@ -19,4 +21,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-module.exports = app
+export default app
