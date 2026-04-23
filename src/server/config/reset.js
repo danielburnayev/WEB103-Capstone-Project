@@ -1,3 +1,6 @@
+require('dotenv').config()
+import { pool } from './database'
+
 const resetDatabase = async () => {
   console.log('DB name:', process.env.PGDATABASE)
 
