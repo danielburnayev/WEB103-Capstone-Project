@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 8080
 
 app.use(express.json())
 
+// specifying api path for server to use
 app.use('/api/users', userRoutes)
 app.use('/api/calendars', calendarRoutes)
 app.use('/api/calendars', calendarUserRoutes)
