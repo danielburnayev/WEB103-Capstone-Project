@@ -13,16 +13,20 @@ function LandingPage() {
   const [calendarLoadError, setCalendarLoadError] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [currentUsername, setCurrentUsername] = useState("");
 
   useEffect(() => {
     const savedUserId = Number(window.localStorage.getItem("insync-user-id"));
     const savedEmail = window.localStorage.getItem("insync-user-email") ?? "";
+    const savedUsername = window.localStorage.getItem("insync-last-username") ?? "";
     if (Number.isInteger(savedUserId) && savedUserId > 0) {
       setCurrentUserId(savedUserId);
       setCurrentUserEmail(savedEmail);
+      setCurrentUsername(savedUsername);
     } else {
       setCurrentUserId(null);
       setCurrentUserEmail("");
+      setCurrentUsername("");
     }
   }, []);
 
@@ -60,16 +64,21 @@ function LandingPage() {
       ? [
           {
             label: "Sign Out",
+            variant: "primary",
             onClick: () => {
               window.localStorage.removeItem("insync-user-id");
               window.localStorage.removeItem("insync-user-email");
               setCurrentUserId(null);
               setCurrentUserEmail("");
+              setCurrentUsername("");
               setMyCalendars([]);
             },
           },
         ]
-      : [{ label: "Sign Up", onClick: () => navigate("/signup") }]),
+      : [
+          { label: "Log In", onClick: () => navigate("/login") },
+          { label: "Sign Up", variant: "primary", onClick: () => navigate("/signup") },
+        ]),
     { label: "Join Calendar", onClick: () => navigate("/join") },
   ];
 
@@ -78,12 +87,21 @@ function LandingPage() {
       <Header navItems={landingNavItems} />
       <main className="flex flex-col items-center justify-center gap-15 h-full">
          <div className="flex flex-col items-center justify-center gap-5">
-            <h2 className="text-4xl font-medium">Lorem ipsum dolor sit amet consectetur adipisicing elit.</h2>
-            <p className="text-gray-700">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quisquam, voluptatum.</p>
+            <h2 className="text-4xl font-medium">
+              {currentUserId
+                ? `Welcome to InSync Calendar, ${currentUsername || currentUserEmail.split("@")[0] || "there"}!`
+                : "Welcome to InSync Calendar"}
+            </h2>
+            <p className="text-gray-700">
+              Plan together, stay in sync, and jump back into your shared calendars quickly.
+            </p>
             {currentUserEmail ? (
               <p className="text-sm text-gray-500">Logged in as {currentUserEmail}</p>
             ) : null}
-            <button className="bg-black text-white px-7 py-4 rounded" onClick={() => setShowCreateCalendar(true)}>
+            <button
+              className="bg-black text-white px-7 py-4 rounded transition hover:bg-gray-800 active:scale-[0.98]"
+              onClick={() => setShowCreateCalendar(true)}
+            >
               Create Calendar
             </button>
          </div>
@@ -106,7 +124,7 @@ function LandingPage() {
                 <button
                   key={calendar.id}
                   onClick={() => navigate(`/calendar/${calendar.join_code}`)}
-                  className="bg-white rounded-lg border border-gray-300 p-4 text-left hover:bg-gray-50"
+                  className="bg-white rounded-lg border border-gray-300 p-4 text-left transition hover:bg-gray-50 hover:border-gray-400 active:scale-[0.99]"
                 >
                   <p className="font-semibold text-lg">{calendar.name}</p>
                   <p className="text-sm text-gray-600">Code: {calendar.join_code}</p>

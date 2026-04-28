@@ -46,12 +46,14 @@ function CreateCalendar({ onClose }) {
         const existingMembers = await getUsersInCalendar(createdCalendarId);
         const isAlreadyMember = existingMembers.some((member) => Number(member.user_id) === currentUserId);
         if (!isAlreadyMember) {
-          const derivedUsername = (currentUserEmail.split("@")[0] || "You").slice(0, 50);
+          const lastUsedUsername = window.localStorage.getItem("insync-last-username") ?? "";
+          const derivedUsername = (lastUsedUsername || currentUserEmail.split("@")[0] || "You").slice(0, 50);
           await addUserToCalendar(createdCalendarId, {
             user_id: currentUserId,
             username: derivedUsername,
             color: "#3b82f6",
           });
+          window.localStorage.setItem("insync-last-username", derivedUsername);
         }
       }
 
@@ -96,7 +98,7 @@ function CreateCalendar({ onClose }) {
         />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button
-          className="bg-black text-white px-7 py-3 rounded font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+          className="bg-black text-white px-7 py-3 rounded font-semibold transition hover:bg-gray-800 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={handleCreateCalendar}
           disabled={isCreating}
         >

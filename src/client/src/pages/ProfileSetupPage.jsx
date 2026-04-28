@@ -16,17 +16,28 @@ function ProfileSetupPage() {
   const pin = state?.pin ?? "";
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(() => window.localStorage.getItem("insync-last-username") ?? "");
   const [selectedColor, setSelectedColor] = useState(colorOptions[4].value);
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!username.trim()) return;
-    navigate(`/calendar/${pin}`, { state: { username, color: selectedColor } });
+    const trimmedUsername = username.trim();
+    window.localStorage.setItem("insync-last-username", trimmedUsername);
+    navigate(`/calendar/${pin}`, { state: { username: trimmedUsername, color: selectedColor } });
   }
 
   return (
     <div className="flex flex-col h-screen">
+      <div className="absolute top-6 left-6">
+        <button
+          type="button"
+          onClick={() => navigate("/join")}
+          className="bg-white border border-gray-300 rounded px-4 py-2 text-sm font-medium transition hover:bg-gray-100 hover:border-gray-400 active:scale-[0.98]"
+        >
+          Back
+        </button>
+      </div>
       <main className="flex flex-col flex-1 items-center justify-center gap-10">
         <h2 className="text-3xl font-bold">Set up your profile</h2>
 
@@ -63,7 +74,7 @@ function ProfileSetupPage() {
 
           <button
             type="submit"
-            className="bg-black text-white py-3 rounded font-semibold px-7"
+            className="bg-black text-white py-3 rounded font-semibold px-7 transition hover:bg-gray-800 active:scale-[0.98]"
           >
             Save
           </button>

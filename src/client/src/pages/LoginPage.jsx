@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { createUser } from "../services/usersAPI.jsx";
+import { getAllUsers } from "../services/usersAPI.jsx";
 
-function SignUpPage() {
+function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,16 +17,24 @@ function SignUpPage() {
     try {
       setIsSubmitting(true);
       setError("");
-      const createdUser = await createUser({
-        email: email.trim(),
-        password: password.trim(),
-        is_guest: false,
-      });
-      window.localStorage.setItem("insync-user-id", `${createdUser.id}`);
-      window.localStorage.setItem("insync-user-email", createdUser.email);
+      const users = await getAllUsers();
+      const matchedUser = users.find(
+        (user) =>
+          `${user.email}`.toLowerCase() === email.trim().toLowerCase() &&
+          `${user.password}` === password.trim() &&
+          !user.is_guest
+      );
+
+      if (!matchedUser) {
+        setError("Invalid email or password.");
+        return;
+      }
+
+      window.localStorage.setItem("insync-user-id", `${matchedUser.id}`);
+      window.localStorage.setItem("insync-user-email", matchedUser.email);
       navigate("/");
-    } catch (submitError) {
-      setError("Could not sign up. That email may already be in use.");
+    } catch {
+      setError("Could not log in right now. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -41,10 +49,8 @@ function SignUpPage() {
           onSubmit={handleSubmit}
           className="w-full max-w-md border border-gray-200 rounded-xl p-8 flex flex-col gap-5"
         >
-          <h2 className="text-3xl font-bold text-center">Create your account</h2>
-          <p className="text-gray-600 text-center">
-            Sign up with your email and password to get started.
-          </p>
+          <h2 className="text-3xl font-bold text-center">Log in</h2>
+          <p className="text-gray-600 text-center">Use your email and password to continue.</p>
 
           <input
             type="email"
@@ -68,7 +74,7 @@ function SignUpPage() {
             type="submit"
             className="bg-black text-white py-3 rounded font-semibold transition hover:bg-gray-800 active:scale-[0.98]"
           >
-            {isSubmitting ? "Signing Up..." : "Sign Up"}
+            {isSubmitting ? "Logging in..." : "Log In"}
           </button>
           {error ? <p className="text-red-600 text-sm text-center">{error}</p> : null}
         </form>
@@ -77,4 +83,4 @@ function SignUpPage() {
   );
 }
 
-export default SignUpPage;
+export default LoginPage;

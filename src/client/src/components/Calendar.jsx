@@ -25,6 +25,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
     const [calendarId, setCalendarId] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [eventsByDate, setEventsByDate] = useState({});
+    const [memberColorsByUserId, setMemberColorsByUserId] = useState({});
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [isContextReady, setIsContextReady] = useState(false);
@@ -95,6 +96,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
         const endDate = new Date(event.end_time);
         const startMinutes = (startDate.getHours() * 60) + startDate.getMinutes();
         const endMinutes = Math.max(startMinutes + MIN_EVENT_MINUTES, (endDate.getHours() * 60) + endDate.getMinutes());
+        const persistedMemberColor = memberColorsByUserId[event.user_id];
         return {
             id: event.id,
             title: event.title || event.name || "Untitled event",
@@ -102,7 +104,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             date: startDate,
             startMinutes,
             endMinutes,
-            color: event.color || ((event.name || "").trim().toLowerCase() === (username || "").trim().toLowerCase() ? color : undefined),
+            color: persistedMemberColor || event.color || ((event.name || "").trim().toLowerCase() === (username || "").trim().toLowerCase() ? color : undefined),
             isDraft: false,
         };
     }
@@ -127,7 +129,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             mapped[dateKey] = [...(mapped[dateKey] || []), draftBlock];
         }
         return mapped;
-    }, [eventsByDate, eventDraft, eventTitle, username]);
+    }, [eventsByDate, eventDraft, eventTitle, username, memberColorsByUserId]);
 
     useEffect(() => {
         const timerId = setInterval(() => {
@@ -164,10 +166,19 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             }
 
             const members = await existingMembershipResponse.json();
-            const isAlreadyMember = members.some((member) => Number(member.user_id) === Number(userId));
-            if (isAlreadyMember) return;
+            const existingMember = members.find((member) => Number(member.user_id) === Number(userId));
+            if (existingMember) {
+                if (existingMember.username) {
+                    window.localStorage.setItem("insync-last-username", `${existingMember.username}`);
+                }
+                return;
+            }
 
-            const fallbackName = (username || "Member").trim();
+            const fallbackName = (
+                username ||
+                window.localStorage.getItem("insync-last-username") ||
+                "Member"
+            ).trim();
             const addMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -180,6 +191,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             if (!addMembershipResponse.ok) {
                 throw new Error("Failed to join calendar");
             }
+            window.localStorage.setItem("insync-last-username", fallbackName.slice(0, 50));
         }
 
         async function resolveContext() {
@@ -246,6 +258,28 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             }
         }
         loadEvents();
+    }, [calendarId]);
+
+    useEffect(() => {
+        async function loadMemberColors() {
+            if (!calendarId) return;
+            try {
+                const response = await fetch(`/api/calendars/${calendarId}/users`);
+                if (!response.ok) throw new Error("Failed to load calendar members");
+                const members = await response.json();
+                const nextColors = {};
+                members.forEach((member) => {
+                    if (member?.user_id && member?.color) {
+                        nextColors[member.user_id] = member.color;
+                    }
+                });
+                setMemberColorsByUserId(nextColors);
+            } catch (error) {
+                setErrorMessage(error.message);
+            }
+        }
+
+        loadMemberColors();
     }, [calendarId]);
 
     function changeFocusedTime(daysChanged = 0, millisecondsChanged = 0) {
