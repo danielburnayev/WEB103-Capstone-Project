@@ -24,13 +24,13 @@ Since we all have problems scheduling events/meetups with our friends when thing
 
 ## Features
 
-### Allow guest access
+### Allow guest access ✅
 To make sure no one has to give their personal emails or other data and for the sake of a better user experience, those that want don't want to sign up from the get-go can join calendars (with limited access).
 
-### Temporary calendars
+### Temporary calendars ✅
 For those that don't want this to be long term, a user can create a temporary calendar, which will remove itself within a short amount of time. Perfect for guest users who only want to make quick scheduling decisions with their group and don't want to keep the calendar around for future events. Also allows guests all access to adding/creating/altering events.
 
-### Accessing a group calendar with only a 6 digit code
+### Accessing a group calendar with only a 6 digit code ✅
 To make accessing calendars simple, we are using a Kahoot-inspired code system to allow people to join a desired calendar without having to give anything else (no username or password).
 
 ### Add individual events in a shared calendar ✅
