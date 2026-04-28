@@ -1,18 +1,35 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { createUser } from "../services/usersAPI.jsx";
 
 function SignUpPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
 
-    // Placeholder until signup endpoint wiring is added.
-    navigate("/");
+    try {
+      setIsSubmitting(true);
+      setError("");
+      const createdUser = await createUser({
+        email: email.trim(),
+        password: password.trim(),
+        is_guest: false,
+      });
+      window.localStorage.setItem("insync-user-id", `${createdUser.id}`);
+      window.localStorage.setItem("insync-user-email", createdUser.email);
+      navigate("/");
+    } catch (submitError) {
+      setError("Could not sign up. That email may already be in use.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -48,8 +65,9 @@ function SignUpPage() {
           />
 
           <button type="submit" className="bg-black text-white py-3 rounded font-semibold">
-            Sign Up
+            {isSubmitting ? "Signing Up..." : "Sign Up"}
           </button>
+          {error ? <p className="text-red-600 text-sm text-center">{error}</p> : null}
         </form>
       </main>
     </div>

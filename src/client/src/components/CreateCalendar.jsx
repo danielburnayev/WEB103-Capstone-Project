@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
+import { addUserToCalendar, getUsersInCalendar } from "../services/calendarUsersAPI.jsx";
 
 function CreateCalendar({ onClose }) {
   const navigate = useNavigate();
@@ -36,6 +37,23 @@ function CreateCalendar({ onClose }) {
         name: trimmedName,
         join_code: joinCode,
       });
+
+      const currentUserId = Number(window.localStorage.getItem("insync-user-id"));
+      const currentUserEmail = window.localStorage.getItem("insync-user-email") ?? "";
+      const createdCalendarId = createdCalendar?.id;
+
+      if (Number.isInteger(currentUserId) && currentUserId > 0 && createdCalendarId) {
+        const existingMembers = await getUsersInCalendar(createdCalendarId);
+        const isAlreadyMember = existingMembers.some((member) => Number(member.user_id) === currentUserId);
+        if (!isAlreadyMember) {
+          const derivedUsername = (currentUserEmail.split("@")[0] || "You").slice(0, 50);
+          await addUserToCalendar(createdCalendarId, {
+            user_id: currentUserId,
+            username: derivedUsername,
+            color: "#3b82f6",
+          });
+        }
+      }
 
       const codeToUse = createdCalendar?.join_code || joinCode;
       try {

@@ -157,6 +157,31 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             return user.id;
         }
 
+        async function ensureUserMembership(calendarId, userId) {
+            const existingMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`);
+            if (!existingMembershipResponse.ok) {
+                throw new Error("Failed to check calendar membership");
+            }
+
+            const members = await existingMembershipResponse.json();
+            const isAlreadyMember = members.some((member) => Number(member.user_id) === Number(userId));
+            if (isAlreadyMember) return;
+
+            const fallbackName = (username || "Member").trim();
+            const addMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: userId,
+                    username: fallbackName.slice(0, 50),
+                    color: color || "#3b82f6",
+                }),
+            });
+            if (!addMembershipResponse.ok) {
+                throw new Error("Failed to join calendar");
+            }
+        }
+
         async function resolveContext() {
             setIsContextReady(false);
             setErrorMessage("");
@@ -190,6 +215,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
                     resolvedUserId = await createGuestUser();
                 }
 
+                await ensureUserMembership(foundCalendar.id, resolvedUserId);
                 setCurrentUserId(resolvedUserId);
                 setIsContextReady(true);
             } catch (error) {
