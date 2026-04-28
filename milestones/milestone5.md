@@ -25,11 +25,11 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
 👉🏾👉🏾👉🏾 Check off each completed feature below.
 
 - [X] The project includes an Express backend app and a React frontend app
-- [ ] The project includes these backend-specific features:
-  - [ ] At least one of each of the following database relationships in Postgres
-    - [ ] one-to-many
-    - [ ] many-to-many with a join table
-  - [ ] A well-designed RESTful API that:
+- [X] The project includes these backend-specific features:
+  - [X] At least one of each of the following database relationships in Postgres
+    - [X] one-to-many
+    - [X] many-to-many with a join table
+  - [X] A well-designed RESTful API that:
     - [X] supports all four main request types for a single entity (ex. tasks in a to-do list app): GET, POST, PATCH, and DELETE
       - [X] the user can **view** items, such as tasks
       - [X] the user can **create** a new item, such as a task
@@ -37,9 +37,9 @@ Complete the checklist below detailing each baseline, custom, and stretch featur
       - [X] the user can **delete** an existing item, such as a task
     - [X] Routes follow proper naming conventions
   - [ ] The web app includes the ability to reset the database to its default state
-- [ ] The project includes these frontend-specific features:
+- [X] The project includes these frontend-specific features:
   - [X] At least one redirection, where users are able to navigate to a new page with a new URL within the app
-  - [ ] At least one interaction that the user can initiate and complete on the same page without navigating to a new page
+  - [X] At least one interaction that the user can initiate and complete on the same page without navigating to a new page
   - [X] Dynamic frontend routes created with React Router
   - [X] Hierarchically designed React components
     - [X] Components broken down into categories, including Page and Component types
