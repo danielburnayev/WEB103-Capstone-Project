@@ -3,7 +3,8 @@ import Header from "../components/Header";
 import CreateCalendar from "../components/CreateCalendar";
 import { useNavigate } from "react-router-dom";
 import { deleteCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
-import { getUsersInCalendar } from "../services/calendarUsersAPI.jsx";
+import { getUsersInCalendar, removeUserFromCalendar } from "../services/calendarUsersAPI.jsx";
+import { deleteEvent } from "../services/eventsAPI.jsx";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ function LandingPage() {
   const [createdCalendarIds, setCreatedCalendarIds] = useState([]);
   const [calendarToDelete, setCalendarToDelete] = useState(null);
   const [isDeletingCalendar, setIsDeletingCalendar] = useState(false);
+  const [calendarToLeave, setCalendarToLeave] = useState(null);
+  const [isLeavingCalendar, setIsLeavingCalendar] = useState(false);
 
   useEffect(() => {
     const savedUserId = Number(window.localStorage.getItem("insync-user-id"));
@@ -67,6 +70,27 @@ function LandingPage() {
       setCalendarLoadError(error.message || "Failed to delete calendar.");
     } finally {
       setIsDeletingCalendar(false);
+    }
+  }
+
+  async function handleLeaveCalendar() {
+    if (!calendarToLeave?.id || !currentUserId) return;
+    try {
+      setIsLeavingCalendar(true);
+      const eventsResponse = await fetch(`/api/events/calendar/${calendarToLeave.id}`);
+      if (!eventsResponse.ok) throw new Error("Failed to load calendar events.");
+      const calendarEvents = await eventsResponse.json();
+      const myEvents = calendarEvents.filter((event) => Number(event.user_id) === Number(currentUserId));
+
+      await Promise.all(myEvents.map((event) => deleteEvent(event.id)));
+      await removeUserFromCalendar(calendarToLeave.id, currentUserId);
+
+      setMyCalendars((prev) => prev.filter((calendar) => Number(calendar.id) !== Number(calendarToLeave.id)));
+      setCalendarToLeave(null);
+    } catch (error) {
+      setCalendarLoadError(error.message || "Failed to leave calendar.");
+    } finally {
+      setIsLeavingCalendar(false);
     }
   }
 
@@ -154,6 +178,34 @@ function LandingPage() {
           </div>
         </div>
       ) : null}
+      {calendarToLeave ? (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md flex flex-col gap-4">
+            <h3 className="text-xl font-bold">Leave calendar?</h3>
+            <p className="text-gray-700">
+              Are you sure you want to leave <span className="font-semibold">{calendarToLeave.name}</span>? You will be removed from this calendar and your events in it will be deleted.
+            </p>
+            <div className="flex justify-end gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setCalendarToLeave(null)}
+                className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 transition hover:bg-gray-100 hover:border-gray-400 active:scale-[0.98]"
+                disabled={isLeavingCalendar}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleLeaveCalendar}
+                className="px-4 py-2 rounded-xl bg-amber-600 text-white font-semibold transition hover:bg-amber-700 active:scale-[0.98] disabled:opacity-60"
+                disabled={isLeavingCalendar}
+              >
+                {isLeavingCalendar ? "Leaving..." : "Leave"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <main className="flex flex-col items-center justify-center gap-15 h-full">
          <div className="flex flex-col items-center justify-center gap-5">
             <h2 className="text-4xl font-medium">
@@ -195,28 +247,38 @@ function LandingPage() {
                   onClick={() => navigate(`/calendar/${calendar.join_code}`)}
                   className="group relative bg-white rounded-lg border border-gray-300 p-4 text-left transition hover:bg-gray-50 hover:border-gray-400 active:scale-[0.99]"
                 >
-                  {createdCalendarIds.includes(Number(calendar.id)) ? (
-                    <span
-                      role="button"
-                      aria-label="Delete calendar"
-                      title="Delete calendar"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                  <span
+                    role="button"
+                    aria-label={createdCalendarIds.includes(Number(calendar.id)) ? "Delete calendar" : "Leave calendar"}
+                    title={createdCalendarIds.includes(Number(calendar.id)) ? "Delete calendar" : "Leave calendar"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (createdCalendarIds.includes(Number(calendar.id))) {
                         setCalendarToDelete(calendar);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          e.stopPropagation();
+                      } else {
+                        setCalendarToLeave(calendar);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (createdCalendarIds.includes(Number(calendar.id))) {
                           setCalendarToDelete(calendar);
+                        } else {
+                          setCalendarToLeave(calendar);
                         }
-                      }}
-                      tabIndex={0}
-                      className="absolute top-2 right-2 inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 bg-white/90 border border-red-200 opacity-0 group-hover:opacity-100 focus:opacity-100 transition hover:bg-red-50"
-                    >
-                      🗑
-                    </span>
-                  ) : null}
+                      }
+                    }}
+                    tabIndex={0}
+                    className={`absolute top-2 right-2 inline-flex items-center justify-center w-8 h-8 rounded-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transition ${
+                      createdCalendarIds.includes(Number(calendar.id))
+                        ? "text-red-600 bg-white/90 border border-red-200 hover:bg-red-50"
+                        : "text-amber-700 bg-white/90 border border-amber-200 hover:bg-amber-50"
+                    }`}
+                  >
+                    {createdCalendarIds.includes(Number(calendar.id)) ? "🗑" : "🚪"}
+                  </span>
                   <p className="font-semibold text-lg">{calendar.name}</p>
                   <p className="text-sm text-gray-600">Code: {calendar.join_code}</p>
                 </button>
