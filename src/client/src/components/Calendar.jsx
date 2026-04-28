@@ -142,72 +142,78 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
         return () => clearInterval(timerId);
     }, []);
 
-    useEffect(() => {
-        async function createGuestUser() {
-            const safeName = (username || "guest").replaceAll(/\s+/g, "-").toLowerCase();
-            const response = await fetch("/api/users", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: `${safeName}-${Date.now()}@guest.local`,
-                    password: "guest",
-                    is_guest: true,
-                }),
-            });
-            if (!response.ok) throw new Error("Failed to create user");
-            const user = await response.json();
-            window.localStorage.setItem("insync-user-id", `${user.id}`);
-            return user.id;
+    async function createGuestUserForCalendar() {
+        const safeName = (username || "guest").replaceAll(/\s+/g, "-").toLowerCase();
+        const response = await fetch("/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: `${safeName}-${Date.now()}@guest.local`,
+                password: "guest",
+                is_guest: true,
+            }),
+        });
+        if (!response.ok) throw new Error("Failed to create user");
+        const user = await response.json();
+        window.localStorage.setItem("insync-user-id", `${user.id}`);
+        return user.id;
+    }
+
+    async function ensureUserMembership(calendarId, userId) {
+        const isLoggedInUser = Boolean(window.localStorage.getItem("insync-user-email"));
+        const perCalendar = getCalendarDisplay(code);
+        const existingMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`);
+        if (!existingMembershipResponse.ok) {
+            throw new Error("Failed to check calendar membership");
         }
 
-        async function ensureUserMembership(calendarId, userId) {
-            const isLoggedInUser = Boolean(window.localStorage.getItem("insync-user-email"));
-            const perCalendar = getCalendarDisplay(code);
-            const existingMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`);
-            if (!existingMembershipResponse.ok) {
-                throw new Error("Failed to check calendar membership");
-            }
-
-            const members = await existingMembershipResponse.json();
-            const existingMember = members.find((member) => Number(member.user_id) === Number(userId));
-            if (existingMember) {
-                if (!isLoggedInUser && existingMember.username && code) {
-                    setCalendarDisplay(code, {
-                        username: `${existingMember.username}`,
-                        color: existingMember.color || "#3b82f6",
-                    });
-                }
-                return;
-            }
-
-            const fallbackName = (
-                username ||
-                perCalendar?.username ||
-                "Member"
-            ).trim();
-            const fallbackColor = color || perCalendar?.color || "#3b82f6";
-            const addMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    user_id: userId,
-                    username: fallbackName.slice(0, 50),
-                    color: fallbackColor,
-                }),
-            });
-            if (!addMembershipResponse.ok) {
-                throw new Error("Failed to join calendar");
-            }
-            if (!isLoggedInUser && code) {
+        const members = await existingMembershipResponse.json();
+        const existingMember = members.find((member) => Number(member.user_id) === Number(userId));
+        if (existingMember) {
+            if (!isLoggedInUser && existingMember.username && code) {
                 setCalendarDisplay(code, {
-                    username: fallbackName.slice(0, 50),
-                    color: fallbackColor,
+                    username: `${existingMember.username}`,
+                    color: existingMember.color || "#3b82f6",
                 });
             }
+            return;
         }
+
+        const fallbackName = (
+            username ||
+            perCalendar?.username ||
+            "Member"
+        ).trim();
+        const fallbackColor = color || perCalendar?.color || "#3b82f6";
+        const addMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_id: userId,
+                username: fallbackName.slice(0, 50),
+                color: fallbackColor,
+            }),
+        });
+        if (!addMembershipResponse.ok) {
+            throw new Error("Failed to join calendar");
+        }
+        if (!isLoggedInUser && code) {
+            setCalendarDisplay(code, {
+                username: fallbackName.slice(0, 50),
+                color: fallbackColor,
+            });
+        }
+    }
+
+    // Only `code` triggers full calendar/user bootstrap. Including username/color here used to rerun
+    // resolveContext whenever profile display hydrated, resetting isContextReady — leaving Save stuck on Loading.
+    useEffect(() => {
+        let cancelled = false;
 
         async function resolveContext() {
             setIsContextReady(false);
+            setCalendarId(null);
+            setCurrentUserId(null);
             setErrorMessage("");
             try {
                 if (!code) throw new Error("Missing calendar code in URL.");
@@ -215,14 +221,12 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
                 const calendars = await getAllCalendars();
                 let foundCalendar = calendars.find((calendar) => `${calendar.join_code}` === `${code}`);
 
-                // Auto-create the calendar if this join code does not exist yet.
                 if (!foundCalendar) {
                     foundCalendar = await createCalendar({
                         name: `Shared ${code}`,
                         join_code: `${code}`.slice(0, 6).toUpperCase(),
                     });
                 }
-                setCalendarId(foundCalendar.id);
 
                 const cachedIdRaw = window.localStorage.getItem("insync-user-id");
                 const cachedId = Number(cachedIdRaw);
@@ -236,26 +240,48 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
                 }
 
                 if (!resolvedUserId) {
-                    resolvedUserId = await createGuestUser();
+                    resolvedUserId = await createGuestUserForCalendar();
                 }
 
+                if (cancelled) return;
+
+                setCalendarId(foundCalendar.id);
                 setCurrentUserId(resolvedUserId);
                 setIsContextReady(true);
-
-                // Membership sync should not block event creation UX.
-                try {
-                    await ensureUserMembership(foundCalendar.id, resolvedUserId);
-                } catch (membershipError) {
-                    console.error("Membership sync warning:", membershipError);
-                    setErrorMessage("Joined with limited permissions. You can still create events.");
-                }
             } catch (error) {
-                setErrorMessage(error.message);
+                if (!cancelled) {
+                    setErrorMessage(error.message);
+                }
             }
         }
 
         resolveContext();
-    }, [code, username, color]);
+        return () => {
+            cancelled = true;
+        };
+    }, [code]);
+
+    useEffect(() => {
+        if (!calendarId || !currentUserId) return;
+
+        let cancelled = false;
+
+        async function syncMembership() {
+            try {
+                await ensureUserMembership(calendarId, currentUserId);
+            } catch (membershipError) {
+                if (!cancelled) {
+                    console.error("Membership sync warning:", membershipError);
+                    setErrorMessage("Joined with limited permissions. You can still create events.");
+                }
+            }
+        }
+
+        syncMembership();
+        return () => {
+            cancelled = true;
+        };
+    }, [calendarId, currentUserId, code, username, color]);
 
     useEffect(() => {
         async function loadEvents() {
@@ -349,6 +375,12 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
     }
 
     function trackKeyPress(keyPressEvent) {
+        if (showEventDetailPopup) return;
+        const el = keyPressEvent.target;
+        const tag = el?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el?.isContentEditable) {
+            return;
+        }
         if (keyPressEvent.key === "ArrowLeft") {changeFocusedTime(isWeekView ? -7 : -1);} 
         else if (keyPressEvent.key === "ArrowRight") {changeFocusedTime(isWeekView ? 7 : 1);}
         else if (keyPressEvent.key === "w") {changeCalendarView(true);}
