@@ -235,9 +235,16 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
                     resolvedUserId = await createGuestUser();
                 }
 
-                await ensureUserMembership(foundCalendar.id, resolvedUserId);
                 setCurrentUserId(resolvedUserId);
                 setIsContextReady(true);
+
+                // Membership sync should not block event creation UX.
+                try {
+                    await ensureUserMembership(foundCalendar.id, resolvedUserId);
+                } catch (membershipError) {
+                    console.error("Membership sync warning:", membershipError);
+                    setErrorMessage("Joined with limited permissions. You can still create events.");
+                }
             } catch (error) {
                 setErrorMessage(error.message);
             }
