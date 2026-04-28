@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Button from "../components/Button.jsx";
 import { times, daysOfWeek, months } from "../services/calendar-data.js";
-import { createEvent } from "../services/eventsAPI.jsx";
+import { createEvent, updateEvent, deleteEvent } from "../services/eventsAPI.jsx";
+import { createCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
 
 const CALENDAR_HEIGHT = 1056;
 const MINUTES_IN_DAY = 1440;
 const MIN_EVENT_MINUTES = 15;
 
-export default function Calendar({ code, username }) {
+export default function Calendar({ code, username, eventActionMode = "none", onChangeEventActionMode = () => {}, addActionNonce = 0 }) {
     const [currDate, setCurrDate] = useState(new Date());
     const [currTotalMinutes, setCurrTotalMinutes] = useState(60 * currDate.getHours() + currDate.getMinutes());
 
@@ -27,6 +28,8 @@ export default function Calendar({ code, username }) {
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [isContextReady, setIsContextReady] = useState(false);
+    const [popupMode, setPopupMode] = useState("create");
+    const [editingEventId, setEditingEventId] = useState(null);
 
     function formatDateKey(date) {
         return [
@@ -96,6 +99,7 @@ export default function Calendar({ code, username }) {
             id: event.id,
             title: event.title || event.name || "Untitled event",
             name: event.name || username || "Guest",
+            date: startDate,
             startMinutes,
             endMinutes,
             isDraft: false,
@@ -157,23 +161,15 @@ export default function Calendar({ code, username }) {
             try {
                 if (!code) throw new Error("Missing calendar code in URL.");
 
-                const calendarResponse = await fetch("/api/calendars");
-                if (!calendarResponse.ok) throw new Error("Failed to load calendars");
-                const calendars = await calendarResponse.json();
+                const calendars = await getAllCalendars();
                 let foundCalendar = calendars.find((calendar) => `${calendar.join_code}` === `${code}`);
 
                 // Auto-create the calendar if this join code does not exist yet.
                 if (!foundCalendar) {
-                    const createCalendarResponse = await fetch("/api/calendars", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            name: `Shared ${code}`,
-                            join_code: `${code}`.slice(0, 6).toUpperCase(),
-                        }),
+                    foundCalendar = await createCalendar({
+                        name: `Shared ${code}`,
+                        join_code: `${code}`.slice(0, 6).toUpperCase(),
                     });
-                    if (!createCalendarResponse.ok) throw new Error("Failed to create calendar");
-                    foundCalendar = await createCalendarResponse.json();
                 }
                 setCalendarId(foundCalendar.id);
 
@@ -284,6 +280,8 @@ export default function Calendar({ code, username }) {
     }
 
     function setUpEventCreationPopup(draftData) {
+        setPopupMode("create");
+        setEditingEventId(null);
         setEventDraft(draftData);
         setEventTitle("");
         setErrorMessage("");
@@ -294,6 +292,8 @@ export default function Calendar({ code, username }) {
         setShowEventDetailPopup(false);
         setEventDraft(null);
         setEventTitle("");
+        setPopupMode("create");
+        setEditingEventId(null);
     }
 
     function updateDraftTime(boundary, rawValue) {
@@ -344,12 +344,27 @@ export default function Calendar({ code, username }) {
                 start_time: minutesToDayDate(eventDraft.date, eventDraft.startMinutes),
                 end_time: minutesToDayDate(eventDraft.date, eventDraft.endMinutes),
             };
-            const created = await createEvent(payload);
-            const dateKey = formatDateKey(new Date(created.start_time));
-            setEventsByDate((prev) => ({
-                ...prev,
-                [dateKey]: [...(prev[dateKey] || []), created],
-            }));
+            if (popupMode === "edit" && editingEventId) {
+                const updated = await updateEvent(editingEventId, payload);
+                const updatedId = updated.id;
+                setEventsByDate((prev) => {
+                    const next = {};
+                    Object.entries(prev).forEach(([dateKey, events]) => {
+                        next[dateKey] = events.filter((event) => event.id !== updatedId);
+                    });
+                    const updatedDateKey = formatDateKey(new Date(updated.start_time));
+                    next[updatedDateKey] = [...(next[updatedDateKey] || []), updated];
+                    return next;
+                });
+                onChangeEventActionMode("none");
+            } else {
+                const created = await createEvent(payload);
+                const dateKey = formatDateKey(new Date(created.start_time));
+                setEventsByDate((prev) => ({
+                    ...prev,
+                    [dateKey]: [...(prev[dateKey] || []), created],
+                }));
+            }
             closePopupAndClearDraft();
         } catch (error) {
             setErrorMessage(error.message);
@@ -357,6 +372,50 @@ export default function Calendar({ code, username }) {
             setIsSaving(false);
         }
     }
+
+    async function handleEventClick(eventBlock) {
+        if (!eventBlock || eventBlock.id === "draft") return;
+
+        if (eventActionMode === "remove") {
+            try {
+                await deleteEvent(eventBlock.id);
+                setEventsByDate((prev) => {
+                    const next = {};
+                    Object.entries(prev).forEach(([dateKey, events]) => {
+                        next[dateKey] = events.filter((event) => event.id !== eventBlock.id);
+                    });
+                    return next;
+                });
+                onChangeEventActionMode("none");
+            } catch (error) {
+                setErrorMessage(error.message);
+            }
+            return;
+        }
+
+        if (eventActionMode === "edit") {
+            setPopupMode("edit");
+            setEditingEventId(eventBlock.id);
+            setEventDraft({
+                date: eventBlock.date ? new Date(eventBlock.date) : new Date(focusedDate),
+                startMinutes: eventBlock.startMinutes,
+                endMinutes: eventBlock.endMinutes,
+            });
+            setEventTitle(eventBlock.title || "");
+            setErrorMessage("");
+            setShowEventDetailPopup(true);
+        }
+    }
+
+    useEffect(() => {
+        if (!addActionNonce) return;
+        const startMinutes = currDate.getHours() * 60;
+        setUpEventCreationPopup({
+            date: new Date(focusedDate),
+            startMinutes,
+            endMinutes: Math.min(MINUTES_IN_DAY, startMinutes + 60),
+        });
+    }, [addActionNonce]);
 
     useEffect(() => {
         document.body.onkeydown = (event) => trackKeyPress(event);
@@ -417,7 +476,9 @@ export default function Calendar({ code, username }) {
                                            weekday={isWeekView} 
                                            date={date} 
                                            events={visibleEvents[formatDateKey(date)] || []}
-                                           triggerEventPopup={setUpEventCreationPopup}/>
+                                           triggerEventPopup={setUpEventCreationPopup}
+                                           eventActionMode={eventActionMode}
+                                           onEventClick={handleEventClick}/>
                     ))}
                 </div>
 
@@ -439,7 +500,7 @@ export default function Calendar({ code, username }) {
             <div className={`${showEventDetailPopup ? "block" : "hidden"} absolute top-0 left-0 w-full h-full bg-[#9e9effab] z-1000`}>
                 <div className="flex flex-col gap-4 items-start justify-start w-[360px] min-h-[220px] bg-[#9e9eff] rounded-md p-4 mt-6 ml-6">
                     <div className="flex w-full justify-between items-center">
-                        <h3 className="font-bold text-lg">Create Event</h3>
+                        <h3 className="font-bold text-lg">{popupMode === "edit" ? "Edit Event" : "Create Event"}</h3>
                         <Button text="X" id="leave-event-creator-btn" onClick={closePopupAndClearDraft}/>
                     </div>
                     <p><span className="font-semibold">User:</span> {username || "Guest"}</p>
@@ -474,7 +535,11 @@ export default function Calendar({ code, username }) {
                     />
                     {errorMessage ? <p className="text-red-700 text-sm">{errorMessage}</p> : null}
                     <Button
-                        text={isSaving ? "Saving..." : (isContextReady ? "Save Event" : "Loading...")}
+                        text={
+                            isSaving
+                                ? "Saving..."
+                                : (isContextReady ? (popupMode === "edit" ? "Save Changes" : "Save Event") : "Loading...")
+                        }
                         id="save-event-btn"
                         onClick={saveEventFromPopup}
                         disabled={!isContextReady || isSaving}
@@ -500,7 +565,17 @@ function CalendarDayColumn(props) {
         return Math.floor((normalized / CALENDAR_HEIGHT) * MINUTES_IN_DAY);
     }
 
+    function minutesToLabel(minutes) {
+        let hour = Math.floor(minutes / 60);
+        const minute = `${minutes % 60}`.padStart(2, "0");
+        const isAM = hour < 12;
+        if (hour === 0) hour = 12;
+        if (hour > 12) hour -= 12;
+        return `${hour}:${minute}${isAM ? "am" : "pm"}`;
+    }
+
     function startEventCreation(mouseEvent) {        
+        if (props.eventActionMode !== "none") return;
         const startPos = mouseEvent.nativeEvent.offsetY;
         setCreatingEvent(true);
         setEventStartY(startPos);
@@ -508,6 +583,7 @@ function CalendarDayColumn(props) {
     }
 
     function changeEventSize(mouseEvent) {
+        if (props.eventActionMode !== "none") return;
         if (!creatingEvent) return;
         setEventEndY(mouseEvent.nativeEvent.offsetY);
     }
@@ -554,9 +630,16 @@ function CalendarDayColumn(props) {
                 const height = Math.max(18, ((event.endMinutes - event.startMinutes) / MINUTES_IN_DAY) * CALENDAR_HEIGHT);
                 return (
                 <div key={`${id}-event-${index}`} 
-                     className={`absolute w-full border ${event.isDraft ? "bg-amber-200 border-amber-500" : "bg-amber-300 border-amber-700"} pointer-events-none`}
-                     style={{ top: `${top}px`, height: `${height}px` }}>
+                     className={`absolute w-full border ${event.isDraft ? "bg-amber-200 border-amber-500" : "bg-amber-300 border-amber-700"} ${event.isDraft || props.eventActionMode === "none" ? "pointer-events-none" : "pointer-events-auto cursor-pointer ring-2 ring-yellow-300"}`}
+                     style={{ top: `${top}px`, height: `${height}px` }}
+                     onClick={() => props.onEventClick?.({
+                        ...event,
+                        date: props.date,
+                     })}>
                         <p className="select-none text-xs px-1 truncate">{event.title}</p>
+                        <p className="select-none text-[10px] px-1">
+                            {minutesToLabel(event.startMinutes)} - {minutesToLabel(event.endMinutes)}
+                        </p>
                         <p className="select-none text-[10px] px-1">{event.name}</p>
 
                 </div>

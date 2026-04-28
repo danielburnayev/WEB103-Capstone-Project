@@ -1,16 +1,32 @@
 import CalendarUserDisplay from "../components/CalendarUserDisplay.jsx";
 import Button from "../components/Button.jsx";
 
-export default function CalendarUserSidebar() {
+export default function CalendarUserSidebar(props) {
+    const activeMode = props.activeMode ?? "none";
+
+    function getModeButtonStyle(mode) {
+        return activeMode === mode ? "bg-yellow-300 border-yellow-500 font-bold" : "";
+    }
+
     return (
         <div className={"flex flex-col items-start justify-start h-full w-[12.5%] pt-3"}>
             <div className={"flex flex-col items-center justify-start gap-5 h-[50%] w-full"}>
                 <CalendarUserDisplay username="You" color="#007bff" displayingYou={true} />
 
                 <div className={"flex flex-row items-center justify-start gap-3"}>
-                    <Button text="Add" id="add-event-btn"/>
-                    <Button text="Edit" id="edit-event-btn"/>
-                    <Button text="Remove" id="remove-event-btn"/>
+                    <Button text="Add" id="add-event-btn" onClick={props.onAddEvent}/>
+                    <Button
+                        text="Edit"
+                        id="edit-event-btn"
+                        className={getModeButtonStyle("edit")}
+                        onClick={props.onToggleEditMode}
+                    />
+                    <Button
+                        text="Remove"
+                        id="remove-event-btn"
+                        className={getModeButtonStyle("remove")}
+                        onClick={props.onToggleRemoveMode}
+                    />
                 </div>
 
                 <div className={"flex flex-col items-center justify-start gap-2"}>
