@@ -9,10 +9,10 @@ export default function CalendarUserDisplay(props) {
     };
 
     return (   
-         <div className="flex flex-row justify-start w-[95%]">
-            <div className={"flex flex-row items-center justify-center w-fit gap-2 hover:scale-150 hover:translate-x-[25%]"}>
-                <div className={"w-[20px] h-[20px] rounded-full"} style={userColorStyle}/>
-                <p className={`${(displayingYou) ? "text-3xl" : "text-l"} select-none`}>{username}</p>
+         <div className="flex flex-row justify-start w-full">
+            <div className={"flex flex-row items-center justify-start w-full gap-3 p-2 rounded-xl hover:bg-gray-100 transition"}>
+                <div className={"w-[20px] h-[20px] rounded-full border border-black/10"} style={userColorStyle}/>
+                <p className={`${(displayingYou) ? "text-base font-semibold" : "text-sm font-medium text-gray-600"} select-none`}>{username}</p>
             </div>
         </div>
     );

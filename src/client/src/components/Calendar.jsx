@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import Button from "../components/Button.jsx";
 import { times, daysOfWeek, months } from "../services/calendar-data.js";
 import { createEvent, updateEvent, deleteEvent } from "../services/eventsAPI.jsx";
@@ -8,7 +8,7 @@ const CALENDAR_HEIGHT = 1056;
 const MINUTES_IN_DAY = 1440;
 const MIN_EVENT_MINUTES = 15;
 
-export default function Calendar({ code, username, eventActionMode = "none", onChangeEventActionMode = () => {}, addActionNonce = 0 }) {
+const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d", eventActionMode = "none", onChangeEventActionMode = () => {}, addActionNonce = 0, onViewModeChange = () => {} }, ref) {
     const [currDate, setCurrDate] = useState(new Date());
     const [currTotalMinutes, setCurrTotalMinutes] = useState(60 * currDate.getHours() + currDate.getMinutes());
 
@@ -102,6 +102,7 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
             date: startDate,
             startMinutes,
             endMinutes,
+            color: event.color || ((event.name || "").trim().toLowerCase() === (username || "").trim().toLowerCase() ? color : undefined),
             isDraft: false,
         };
     }
@@ -120,6 +121,7 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
                 name: username || "Guest",
                 startMinutes: eventDraft.startMinutes,
                 endMinutes: eventDraft.endMinutes,
+                color,
                 isDraft: true,
             };
             mapped[dateKey] = [...(mapped[dateKey] || []), draftBlock];
@@ -236,6 +238,7 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
 
     function changeCalendarView(isWeek, providedDate = undefined) {
         setIsWeekView(isWeek);
+        onViewModeChange(isWeek ? "week" : "day");
 
         if (!isWeek) {
             const appliedDate = providedDate === undefined ? focusedDate : providedDate;
@@ -343,6 +346,7 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
                 title: eventTitle.trim(),
                 start_time: minutesToDayDate(eventDraft.date, eventDraft.startMinutes),
                 end_time: minutesToDayDate(eventDraft.date, eventDraft.endMinutes),
+                color,
             };
             if (popupMode === "edit" && editingEventId) {
                 const updated = await updateEvent(editingEventId, payload);
@@ -424,52 +428,48 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
         };
     });
 
+    useImperativeHandle(ref, () => ({
+        goBack: () => changeFocusedTime(isWeekView ? -7 : -1),
+        goForward: () => changeFocusedTime(isWeekView ? 7 : 1),
+        goToday: () => changeFocusedTime(0, currDate.getTime() - focusedDate.getTime()),
+        setDayView: () => changeCalendarView(false),
+        setWeekView: () => changeCalendarView(true),
+    }), [isWeekView, currDate, focusedDate]);
+
     return (
-        <div className={"relative h-full w-[87.5%] bg-gray-300 rounded-xl"}>
-            <div className={"flex flex-row h-[10%] border-b"}> {/* top portion (buttons, dates, month, year) */}
-                <div className={"flex flex-col items-center justify-center w-[7.5%] h-full"}> {/* calendar buttons container */}
-                    <div className={"flex flex-row items-center justify-center"}>
-                        <Button text="<-" id="back-calendar-btn" onClick={() => changeFocusedTime(isWeekView ? -7 : -1)}/>
-                        <Button text="->" id="forward-calendar-btn" onClick={() => changeFocusedTime(isWeekView ? 7 : 1)}/>
-                        <Button text="Today" id="today-calendar-btn" onClick={() => changeFocusedTime(0, currDate.getTime() - focusedDate.getTime())}/>
-                    </div>
-
-                    <div className={"flex flex-row items-center justify-center"}>
-                        <Button text="Day" id="day-calendar-btn" onClick={() => changeCalendarView(false)}/>
-                        <Button text="Week" id="week-calendar-btn" onClick={() => changeCalendarView(true)}/>
-                    </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-start w-[92.5%] h-full"> {/* month, year, and dates/days display */}
-                    <h2 className="font-bold">{month} {year}</h2> {/* month and year */}
-                    <div className={"flex flex-row items-center justify-around w-full h-full"}> {/* dates/days */}
+        <div className="flex-1 h-full flex flex-col gap-2">
+            <section className={"relative h-full flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"}>
+                <div className={"flex flex-row h-[14%] border-b border-gray-200 bg-gray-50"}> {/* header month + dates */}
+                    <div className="flex flex-col items-center justify-start w-full h-full pt-1"> {/* month, year, and dates/days display */}
+                        <h2 className="font-bold text-xl tracking-tight pt-1">{month} {year}</h2> {/* month and year */}
+                        <div className={`flex flex-row items-center w-full h-full pb-2 ${isWeekView ? "justify-around pl-[14%]" : "justify-center pl-0"}`}> {/* dates/days */}
                         {displayDays.map((day, index) => (
-                            <div key={`day-date-${index}`} className="flex flex-col items-center justify-end w-[14.285%] h-full cursor-pointer hover:bg-gray-400"
+                            <div key={`day-date-${index}`} className={`flex flex-col items-center justify-end ${isWeekView ? "w-[14.285%]" : "w-full"} h-full cursor-pointer hover:bg-gray-100 transition py-1`}
                                  onClick={() => {clickOnDateLabel(index, weekDates[index])}}>    
-                                <p key={`day-${index}`}>{day}</p>
+                                <p key={`day-${index}`} className="text-sm font-medium text-gray-600">{day}</p>
                                 <p key={`date-${index}`} 
                                    className={`${(weekDates[index].getDate() === currDate.getDate() && 
                                                   weekDates[index].getMonth() === currDate.getMonth() && 
-                                                  weekDates[index].getFullYear() === currDate.getFullYear()) ? 'bg-blue-300' : 'bg-transparent'} rounded-full aspect-square text-center`}>
+                                                  weekDates[index].getFullYear() === currDate.getFullYear()) ? 'bg-blue-500 text-white' : 'bg-transparent text-gray-800'} rounded-full aspect-square text-center w-7 h-7 flex items-center justify-center`}>
                                         {weekDates[index].getDate()}
                                 </p>
                             </div>
                         ))}
+                        </div>
                     </div>
                 </div>
-            </div>
             
-            <div className={"relative flex flex-row h-[90%] overflow-y-scroll"}> {/* calendar content (times, events) */}
-                <div className={"flex flex-col items-center justify-start w-[7.5%] h-full gap-5"}> {/* time slots container */}
+            <div className={"relative flex flex-row h-[86%] overflow-y-scroll bg-white"}> {/* calendar content (times, events) */}
+                <div className={"flex flex-col items-center justify-start w-[14%] h-full gap-5"}> {/* time slots container */}
                     {times.map((time, index) => (
                         <div key={`time-container-${index}`} className="absolute left-0 pb-5" style={{top: `calc(44px * ${index})`}}> 
-                            <div key={`horz-${index}`} className={"w-[87.5vw] border-[0.25px] border-gray-100"}/> {/* horizontal guidelines for hour-long representation and leading to corresponding to specific time labels */}
-                            <p key={`time-${index}`} className={"select-none ml-2"}>{time}</p> {/* time labels */}
+                            <div key={`horz-${index}`} className={"w-[87.5vw] border-[0.5px] border-gray-200"}/> {/* horizontal guidelines for hour-long representation and leading to corresponding to specific time labels */}
+                            <p key={`time-${index}`} className={"select-none ml-2 text-xs text-gray-500"}>{time}</p> {/* time labels */}
                         </div>
                     ))}
                 </div>
 
-                <div className={"flex flex-row items-center justify-center w-[92.5%] h-[1056px]"}> {/* events container */}
+                <div className={"flex flex-row items-center justify-center w-[86%] h-[1056px]"}> {/* events container */}
                     {weekDates.map((date, index) => (
                         <CalendarDayColumn key={`${formatDateKey(date)}-${index}`} 
                                            id={`${daysOfWeek[index]}-column`} 
@@ -478,27 +478,28 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
                                            events={visibleEvents[formatDateKey(date)] || []}
                                            triggerEventPopup={setUpEventCreationPopup}
                                            eventActionMode={eventActionMode}
+                                           userColor={color}
                                            onEventClick={handleEventClick}/>
                     ))}
                 </div>
 
                 {((isWeekView && isCurrDayInFocusedWeek()) || (!isWeekView && isCurrDateFocusedDate())) ? 
-                    <div className={`absolute ${isWeekView ? 'w-[13.21%]' : 'w-full'} border border-red-500 z-101`}
-                        style={{top: `${CALENDAR_HEIGHT * (currTotalMinutes / MINUTES_IN_DAY)}px`, left: (isWeekView) ? `calc(7.5% + (${currDate.getDay()} * 13.21%))` : '7.5%'}}/> // horz. current time display line
+                    <div className={`absolute ${isWeekView ? 'w-[12.28%]' : 'w-full'} border border-red-500 z-101`}
+                        style={{top: `${CALENDAR_HEIGHT * (currTotalMinutes / MINUTES_IN_DAY)}px`, left: (isWeekView) ? `calc(14% + (${currDate.getDay()} * 12.28%))` : '14%'}}/> // horz. current time display line
                     :
                     <></>
                 }
                 </div>
 
-            <div className={"absolute top-0 left-[7.5%] h-full border-[0.5px] z-100"}/> {/* vertical line separating time slots from events */}
+            <div className={"absolute top-0 left-[14%] h-full border-[0.5px] border-gray-200 z-100"}/> {/* vertical line separating time slots from events */}
 
             {Array.from({ length: (isWeekView) ? 6 : 0 }, (_, i) => i + 1).map((i) => (
-                    <div key={`vert ${i}`} className={"absolute top-[5%] h-[95%] border-[0.5px] z-100"} 
-                        style={{left: `calc(7.5% + (${i} * 13.21%))`}}/>
+                    <div key={`vert ${i}`} className={"absolute top-[5%] h-[95%] border-[0.5px] border-gray-200 z-100"} 
+                        style={{left: `calc(14% + (${i} * 12.28%))`}}/>
             ))} {/* vertical lines making event boundaries clear */}
 
-            <div className={`${showEventDetailPopup ? "block" : "hidden"} absolute top-0 left-0 w-full h-full bg-[#9e9effab] z-1000`}>
-                <div className="flex flex-col gap-4 items-start justify-start w-[360px] min-h-[220px] bg-[#9e9eff] rounded-md p-4 mt-6 ml-6">
+            <div className={`${showEventDetailPopup ? "block" : "hidden"} absolute top-0 left-0 w-full h-full bg-black/20 z-1000`}>
+                <div className="flex flex-col gap-4 items-start justify-start w-[380px] min-h-[260px] bg-white rounded-xl p-5 mt-10 ml-10 shadow-xl border border-gray-200">
                     <div className="flex w-full justify-between items-center">
                         <h3 className="font-bold text-lg">{popupMode === "edit" ? "Edit Event" : "Create Event"}</h3>
                         <Button text="X" id="leave-event-creator-btn" onClick={closePopupAndClearDraft}/>
@@ -514,7 +515,7 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
                             type="time"
                             value={eventDraft ? minutesToInputTime(eventDraft.startMinutes) : "00:00"}
                             onChange={(event) => updateDraftTime("start", event.target.value)}
-                            className="border px-2 py-1 rounded w-full"
+                            className="border border-gray-300 px-2 py-1 rounded w-full"
                         />
                     </div>
                     <div className="w-full flex items-center gap-2">
@@ -523,7 +524,7 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
                             type="time"
                             value={eventDraft ? minutesToInputTime(eventDraft.endMinutes) : "00:15"}
                             onChange={(event) => updateDraftTime("end", event.target.value)}
-                            className="border px-2 py-1 rounded w-full"
+                            className="border border-gray-300 px-2 py-1 rounded w-full"
                         />
                     </div>
                     <input
@@ -531,7 +532,7 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
                         value={eventTitle}
                         placeholder="Event title"
                         onChange={(event) => setEventTitle(event.target.value)}
-                        className="w-full border px-2 py-1 rounded"
+                        className="w-full border border-gray-300 px-2 py-1 rounded"
                     />
                     {errorMessage ? <p className="text-red-700 text-sm">{errorMessage}</p> : null}
                     <Button
@@ -546,9 +547,12 @@ export default function Calendar({ code, username, eventActionMode = "none", onC
                     />
                 </div>
             </div> {/* event cover to add/edit/delete events*/}
+            </section>
         </div>
     );
-}
+});
+
+export default Calendar;
 
 
 
@@ -610,6 +614,12 @@ function CalendarDayColumn(props) {
     const previewTop = Math.max(0, Math.min(eventStartY, eventEndY));
     const previewBottom = Math.min(CALENDAR_HEIGHT, Math.max(eventStartY, eventEndY));
     const previewHeight = Math.max(18, previewBottom - previewTop);
+    const previewStyle = {
+        top: `${previewTop}px`,
+        height: `${previewHeight}px`,
+        backgroundColor: `${props.userColor || "#fcd34d"}33`,
+        borderColor: props.userColor || "#fcd34d",
+    };
 
     return (
         <div className={`relative ${(isWeekday) ? "w-[14.285%]" : "w-full"} h-full`} id={id} key={id}
@@ -620,18 +630,24 @@ function CalendarDayColumn(props) {
 
             {creatingEvent ? (
                 <div
-                    className="absolute w-full border border-amber-600 bg-amber-200/70 pointer-events-none z-20"
-                    style={{ top: `${previewTop}px`, height: `${previewHeight}px` }}
+                    className="absolute w-full border-2 pointer-events-none z-20 rounded-md"
+                    style={previewStyle}
                 />
             ) : null}
             
             {props.events.map((event, index) => {
                 const top = (event.startMinutes / MINUTES_IN_DAY) * CALENDAR_HEIGHT;
                 const height = Math.max(18, ((event.endMinutes - event.startMinutes) / MINUTES_IN_DAY) * CALENDAR_HEIGHT);
+                const eventStyle = event.color
+                    ? {
+                        backgroundColor: `${event.color}33`,
+                        borderColor: event.color,
+                      }
+                    : undefined;
                 return (
                 <div key={`${id}-event-${index}`} 
-                     className={`absolute w-full border ${event.isDraft ? "bg-amber-200 border-amber-500" : "bg-amber-300 border-amber-700"} ${event.isDraft || props.eventActionMode === "none" ? "pointer-events-none" : "pointer-events-auto cursor-pointer ring-2 ring-yellow-300"}`}
-                     style={{ top: `${top}px`, height: `${height}px` }}
+                     className={`absolute w-full border-2 rounded-md shadow-sm ${!event.color ? (event.isDraft ? "bg-amber-100 border-amber-400" : "bg-amber-200 border-amber-600") : ""} ${event.isDraft || props.eventActionMode === "none" ? "pointer-events-none" : "pointer-events-auto cursor-pointer ring-2 ring-yellow-300"}`}
+                     style={{ top: `${top}px`, height: `${height}px`, ...eventStyle }}
                      onClick={() => props.onEventClick?.({
                         ...event,
                         date: props.date,

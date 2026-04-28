@@ -6,31 +6,13 @@ export default function Button(props) {
     const className = props.className ?? "";
 
     return (
-        <button className={`border p-1 rounded-xl text-sm ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"} ${className}`} 
+        <button className={`border border-gray-300 bg-white text-gray-800 px-3 py-1.5 rounded-xl text-sm font-medium transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 ${className}`} 
                 id={id}
                 disabled={disabled}
-                onMouseOver={() => showButtonIsHovered()}
-                onMouseOut={() => resetButtonStyle()}
                 onClick={disabled ? undefined : props.onClick}>
 
             {text}
 
         </button>
     );
-
-    function showButtonIsHovered() {
-        if (disabled) return;
-        const thisButton = document.getElementById(id);
-        if (!thisButton) return;
-        thisButton.style.backgroundColor = "black";
-        thisButton.style.color = "white";
-    }
-
-    function resetButtonStyle() {
-        if (disabled) return;
-        const thisButton = document.getElementById(id);
-        if (!thisButton) return;
-        thisButton.style.backgroundColor = "transparent";
-        thisButton.style.color = "black";
-    }
 }
