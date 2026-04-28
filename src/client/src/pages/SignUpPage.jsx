@@ -66,7 +66,7 @@ function SignUpPage() {
 
           <button
             type="submit"
-            className="bg-black text-white py-3 rounded font-semibold transition hover:bg-gray-800 active:scale-[0.98]"
+            className="bg-black text-white py-3 rounded-xl font-semibold transition hover:bg-gray-800 active:scale-[0.98]"
           >
             {isSubmitting ? "Signing Up..." : "Sign Up"}
           </button>

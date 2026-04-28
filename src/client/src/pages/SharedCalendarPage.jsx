@@ -8,8 +8,10 @@ export default function SharedCalendarPage() {
     const { code } = useParams();
     const { state } = useLocation();
     const navigate = useNavigate();
-    const username = state?.username ?? "Guest";
-    const color = state?.color ?? "#3b82f6";
+    const savedUsername = window.localStorage.getItem("insync-last-username") ?? "";
+    const savedColor = window.localStorage.getItem("insync-last-color") ?? "#3b82f6";
+    const username = state?.username ?? (savedUsername || "Guest");
+    const color = state?.color ?? savedColor;
     const [eventActionMode, setEventActionMode] = useState("none");
     const [addActionNonce, setAddActionNonce] = useState(0);
     const [calendarViewMode, setCalendarViewMode] = useState("week");

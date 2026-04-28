@@ -16,6 +16,7 @@ function App() {
         <Route path="/calendar/:code" element={<SharedCalendarPage />} />
         <Route path="/join" element={<JoinCalendarPage />} />
         <Route path="/join/profile" element={<ProfileSetupPage />} />
+        <Route path="/profile" element={<ProfileSetupPage />} />
         {/* Add new routes here */}
       </Routes>
     </BrowserRouter>

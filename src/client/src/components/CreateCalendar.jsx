@@ -40,6 +40,7 @@ function CreateCalendar({ onClose }) {
 
       const currentUserId = Number(window.localStorage.getItem("insync-user-id"));
       const currentUserEmail = window.localStorage.getItem("insync-user-email") ?? "";
+      const lastUsedColor = window.localStorage.getItem("insync-last-color") ?? "#3b82f6";
       const createdCalendarId = createdCalendar?.id;
 
       if (Number.isInteger(currentUserId) && currentUserId > 0 && createdCalendarId) {
@@ -51,9 +52,10 @@ function CreateCalendar({ onClose }) {
           await addUserToCalendar(createdCalendarId, {
             user_id: currentUserId,
             username: derivedUsername,
-            color: "#3b82f6",
+            color: lastUsedColor,
           });
           window.localStorage.setItem("insync-last-username", derivedUsername);
+          window.localStorage.setItem("insync-last-color", lastUsedColor);
         }
       }
 
@@ -98,7 +100,7 @@ function CreateCalendar({ onClose }) {
         />
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button
-          className="bg-black text-white px-7 py-3 rounded font-semibold transition hover:bg-gray-800 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="bg-black text-white px-7 py-3 rounded-xl font-semibold transition hover:bg-gray-800 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={handleCreateCalendar}
           disabled={isCreating}
         >

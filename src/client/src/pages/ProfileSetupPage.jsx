@@ -15,16 +15,24 @@ function ProfileSetupPage() {
   const { state } = useLocation();
   const pin = state?.pin ?? "";
   const navigate = useNavigate();
+  const isCustomizeMode = !pin;
 
   const [username, setUsername] = useState(() => window.localStorage.getItem("insync-last-username") ?? "");
-  const [selectedColor, setSelectedColor] = useState(colorOptions[4].value);
+  const [selectedColor, setSelectedColor] = useState(
+    () => window.localStorage.getItem("insync-last-color") ?? colorOptions[4].value
+  );
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!username.trim()) return;
     const trimmedUsername = username.trim();
     window.localStorage.setItem("insync-last-username", trimmedUsername);
-    navigate(`/calendar/${pin}`, { state: { username: trimmedUsername, color: selectedColor } });
+    window.localStorage.setItem("insync-last-color", selectedColor);
+    if (pin) {
+      navigate(`/calendar/${pin}`, { state: { username: trimmedUsername, color: selectedColor } });
+      return;
+    }
+    navigate("/");
   }
 
   return (
@@ -32,14 +40,14 @@ function ProfileSetupPage() {
       <div className="absolute top-6 left-6">
         <button
           type="button"
-          onClick={() => navigate("/join")}
-          className="bg-white border border-gray-300 rounded px-4 py-2 text-sm font-medium transition hover:bg-gray-100 hover:border-gray-400 active:scale-[0.98]"
+          onClick={() => navigate(isCustomizeMode ? "/" : "/join")}
+          className="bg-white border border-gray-300 rounded-xl px-4 py-2 text-sm font-medium transition hover:bg-gray-100 hover:border-gray-400 active:scale-[0.98]"
         >
           Back
         </button>
       </div>
       <main className="flex flex-col flex-1 items-center justify-center gap-10">
-        <h2 className="text-3xl font-bold">Set up your profile</h2>
+        <h2 className="text-3xl font-bold">{isCustomizeMode ? "Customize your profile" : "Set up your profile"}</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-10 w-full max-w-md px-6">
           <input
@@ -74,9 +82,9 @@ function ProfileSetupPage() {
 
           <button
             type="submit"
-            className="bg-black text-white py-3 rounded font-semibold px-7 transition hover:bg-gray-800 active:scale-[0.98]"
+            className="bg-black text-white py-3 rounded-xl font-semibold px-7 transition hover:bg-gray-800 active:scale-[0.98]"
           >
-            Save
+            {isCustomizeMode ? "Save Profile" : "Save"}
           </button>
         </form>
       </main>

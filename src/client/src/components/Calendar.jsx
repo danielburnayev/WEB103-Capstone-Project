@@ -160,6 +160,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
         }
 
         async function ensureUserMembership(calendarId, userId) {
+            const isLoggedInUser = Boolean(window.localStorage.getItem("insync-user-email"));
             const existingMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`);
             if (!existingMembershipResponse.ok) {
                 throw new Error("Failed to check calendar membership");
@@ -168,8 +169,11 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             const members = await existingMembershipResponse.json();
             const existingMember = members.find((member) => Number(member.user_id) === Number(userId));
             if (existingMember) {
-                if (existingMember.username) {
+                if (!isLoggedInUser && existingMember.username) {
                     window.localStorage.setItem("insync-last-username", `${existingMember.username}`);
+                }
+                if (!isLoggedInUser && existingMember.color) {
+                    window.localStorage.setItem("insync-last-color", `${existingMember.color}`);
                 }
                 return;
             }
@@ -179,19 +183,23 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
                 window.localStorage.getItem("insync-last-username") ||
                 "Member"
             ).trim();
+            const fallbackColor = color || window.localStorage.getItem("insync-last-color") || "#3b82f6";
             const addMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     user_id: userId,
                     username: fallbackName.slice(0, 50),
-                    color: color || "#3b82f6",
+                    color: fallbackColor,
                 }),
             });
             if (!addMembershipResponse.ok) {
                 throw new Error("Failed to join calendar");
             }
-            window.localStorage.setItem("insync-last-username", fallbackName.slice(0, 50));
+            if (!isLoggedInUser) {
+                window.localStorage.setItem("insync-last-username", fallbackName.slice(0, 50));
+                window.localStorage.setItem("insync-last-color", fallbackColor);
+            }
         }
 
         async function resolveContext() {

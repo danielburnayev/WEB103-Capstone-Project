@@ -62,6 +62,7 @@ function LandingPage() {
   const landingNavItems = [
     ...(currentUserId
       ? [
+          { label: "Customize Profile", onClick: () => navigate("/profile") },
           {
             label: "Sign Out",
             variant: "primary",
@@ -99,7 +100,7 @@ function LandingPage() {
               <p className="text-sm text-gray-500">Logged in as {currentUserEmail}</p>
             ) : null}
             <button
-              className="bg-black text-white px-7 py-4 rounded transition hover:bg-gray-800 active:scale-[0.98]"
+              className="bg-black text-white px-7 py-4 rounded-xl transition hover:bg-gray-800 active:scale-[0.98]"
               onClick={() => setShowCreateCalendar(true)}
             >
               Create Calendar
