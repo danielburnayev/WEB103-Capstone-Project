@@ -638,6 +638,8 @@ function CalendarDayColumn(props) {
             {props.events.map((event, index) => {
                 const top = (event.startMinutes / MINUTES_IN_DAY) * CALENDAR_HEIGHT;
                 const height = Math.max(18, ((event.endMinutes - event.startMinutes) / MINUTES_IN_DAY) * CALENDAR_HEIGHT);
+                const showTime = height >= 34;
+                const showName = height >= 52;
                 const eventStyle = event.color
                     ? {
                         backgroundColor: `${event.color}33`,
@@ -646,17 +648,21 @@ function CalendarDayColumn(props) {
                     : undefined;
                 return (
                 <div key={`${id}-event-${index}`} 
-                     className={`absolute w-full border-2 rounded-md shadow-sm ${!event.color ? (event.isDraft ? "bg-amber-100 border-amber-400" : "bg-amber-200 border-amber-600") : ""} ${event.isDraft || props.eventActionMode === "none" ? "pointer-events-none" : "pointer-events-auto cursor-pointer ring-2 ring-yellow-300"}`}
+                     className={`absolute w-full border-2 rounded-md shadow-sm overflow-hidden ${!event.color ? (event.isDraft ? "bg-amber-100 border-amber-400" : "bg-amber-200 border-amber-600") : ""} ${event.isDraft || props.eventActionMode === "none" ? "pointer-events-none" : "pointer-events-auto cursor-pointer ring-2 ring-yellow-300"}`}
                      style={{ top: `${top}px`, height: `${height}px`, ...eventStyle }}
                      onClick={() => props.onEventClick?.({
                         ...event,
                         date: props.date,
                      })}>
-                        <p className="select-none text-xs px-1 truncate">{event.title}</p>
-                        <p className="select-none text-[10px] px-1">
-                            {minutesToLabel(event.startMinutes)} - {minutesToLabel(event.endMinutes)}
-                        </p>
-                        <p className="select-none text-[10px] px-1">{event.name}</p>
+                        <p className="select-none text-xs px-1 truncate leading-4">{event.title}</p>
+                        {showTime ? (
+                            <p className="select-none text-[10px] px-1 truncate leading-4">
+                                {minutesToLabel(event.startMinutes)} - {minutesToLabel(event.endMinutes)}
+                            </p>
+                        ) : null}
+                        {showName ? (
+                            <p className="select-none text-[10px] px-1 truncate leading-4">{event.name}</p>
+                        ) : null}
 
                 </div>
             )})}
