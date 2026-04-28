@@ -1,6 +1,8 @@
 import { pool } from '../config/database.js'
 
 const getAllCalendars = async (req, res) => {
+  console.log("entered all calendars");
+  
   try {
     const result = await pool.query('SELECT * FROM calendars')
     res.json(result.rows)
@@ -10,6 +12,8 @@ const getAllCalendars = async (req, res) => {
 }
 
 const getCalendarById = async (req, res) => {
+  console.log("entered get calendar");
+  
   try {
     const { id } = req.params
     const result = await pool.query('SELECT * FROM calendars WHERE id = $1', [id])
@@ -21,6 +25,8 @@ const getCalendarById = async (req, res) => {
 }
 
 const createCalendar = async (req, res) => {
+  console.log("entered create calendar");
+  
   try {
     const { name, join_code } = req.body
     const result = await pool.query(
@@ -34,6 +40,8 @@ const createCalendar = async (req, res) => {
 }
 
 const updateCalendar = async (req, res) => {
+  console.log("entered update calendar");
+  
   try {
     const { id } = req.params
     const { name, join_code } = req.body
@@ -49,6 +57,8 @@ const updateCalendar = async (req, res) => {
 }
 
 const deleteCalendar = async (req, res) => {
+  console.log("entered delete calendar");
+  
   try {
     const { id } = req.params
     await pool.query('DELETE FROM calendars WHERE id = $1', [id])
