@@ -9,6 +9,19 @@ function CreateCalendar({ onClose }) {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
 
+  function saveCreatedCalendarForCurrentUser(calendarId) {
+    const currentUserId = window.localStorage.getItem("insync-user-id");
+    if (!currentUserId || !calendarId) return;
+
+    const existingRaw = window.localStorage.getItem("insync-created-calendars-by-user");
+    const existing = existingRaw ? JSON.parse(existingRaw) : {};
+    const userCreatedCalendars = Array.isArray(existing[currentUserId]) ? existing[currentUserId] : [];
+    if (!userCreatedCalendars.includes(calendarId)) {
+      existing[currentUserId] = [...userCreatedCalendars, calendarId];
+      window.localStorage.setItem("insync-created-calendars-by-user", JSON.stringify(existing));
+    }
+  }
+
   function generateJoinCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -37,6 +50,7 @@ function CreateCalendar({ onClose }) {
         name: trimmedName,
         join_code: joinCode,
       });
+      saveCreatedCalendarForCurrentUser(createdCalendar?.id);
 
       const currentUserId = Number(window.localStorage.getItem("insync-user-id"));
       const currentUserEmail = window.localStorage.getItem("insync-user-email") ?? "";
