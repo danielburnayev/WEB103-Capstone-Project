@@ -3,6 +3,7 @@ import Button from "../components/Button.jsx";
 import { times, daysOfWeek, months } from "../services/calendar-data.js";
 import { createEvent, updateEvent, deleteEvent } from "../services/eventsAPI.jsx";
 import { createCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
+import { getCalendarDisplay, setCalendarDisplay } from "../services/calendarDisplayStorage.js";
 
 const CALENDAR_HEIGHT = 1056;
 const MINUTES_IN_DAY = 1440;
@@ -161,6 +162,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
 
         async function ensureUserMembership(calendarId, userId) {
             const isLoggedInUser = Boolean(window.localStorage.getItem("insync-user-email"));
+            const perCalendar = getCalendarDisplay(code);
             const existingMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`);
             if (!existingMembershipResponse.ok) {
                 throw new Error("Failed to check calendar membership");
@@ -169,21 +171,21 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             const members = await existingMembershipResponse.json();
             const existingMember = members.find((member) => Number(member.user_id) === Number(userId));
             if (existingMember) {
-                if (!isLoggedInUser && existingMember.username) {
-                    window.localStorage.setItem("insync-last-username", `${existingMember.username}`);
-                }
-                if (!isLoggedInUser && existingMember.color) {
-                    window.localStorage.setItem("insync-last-color", `${existingMember.color}`);
+                if (!isLoggedInUser && existingMember.username && code) {
+                    setCalendarDisplay(code, {
+                        username: `${existingMember.username}`,
+                        color: existingMember.color || "#3b82f6",
+                    });
                 }
                 return;
             }
 
             const fallbackName = (
                 username ||
-                window.localStorage.getItem("insync-last-username") ||
+                perCalendar?.username ||
                 "Member"
             ).trim();
-            const fallbackColor = color || window.localStorage.getItem("insync-last-color") || "#3b82f6";
+            const fallbackColor = color || perCalendar?.color || "#3b82f6";
             const addMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -196,9 +198,11 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             if (!addMembershipResponse.ok) {
                 throw new Error("Failed to join calendar");
             }
-            if (!isLoggedInUser) {
-                window.localStorage.setItem("insync-last-username", fallbackName.slice(0, 50));
-                window.localStorage.setItem("insync-last-color", fallbackColor);
+            if (!isLoggedInUser && code) {
+                setCalendarDisplay(code, {
+                    username: fallbackName.slice(0, 50),
+                    color: fallbackColor,
+                });
             }
         }
 
@@ -251,7 +255,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
         }
 
         resolveContext();
-    }, [code, username]);
+    }, [code, username, color]);
 
     useEffect(() => {
         async function loadEvents() {

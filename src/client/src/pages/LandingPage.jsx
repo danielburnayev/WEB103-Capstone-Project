@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
 import { getUsersInCalendar, removeUserFromCalendar } from "../services/calendarUsersAPI.jsx";
 import { deleteEvent } from "../services/eventsAPI.jsx";
+import { removeCalendarDisplay } from "../services/calendarDisplayStorage.js";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -14,7 +15,6 @@ function LandingPage() {
   const [calendarLoadError, setCalendarLoadError] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
-  const [currentUsername, setCurrentUsername] = useState("");
   const [createdCalendarIds, setCreatedCalendarIds] = useState([]);
   const [calendarToDelete, setCalendarToDelete] = useState(null);
   const [isDeletingCalendar, setIsDeletingCalendar] = useState(false);
@@ -24,15 +24,12 @@ function LandingPage() {
   useEffect(() => {
     const savedUserId = Number(window.localStorage.getItem("insync-user-id"));
     const savedEmail = window.localStorage.getItem("insync-user-email") ?? "";
-    const savedUsername = window.localStorage.getItem("insync-last-username") ?? "";
     if (Number.isInteger(savedUserId) && savedUserId > 0) {
       setCurrentUserId(savedUserId);
       setCurrentUserEmail(savedEmail);
-      setCurrentUsername(savedUsername);
     } else {
       setCurrentUserId(null);
       setCurrentUserEmail("");
-      setCurrentUsername("");
     }
   }, []);
 
@@ -63,6 +60,7 @@ function LandingPage() {
     try {
       setIsDeletingCalendar(true);
       await deleteCalendar(calendarToDelete.id);
+      removeCalendarDisplay(calendarToDelete.join_code);
       setMyCalendars((prev) => prev.filter((calendar) => Number(calendar.id) !== Number(calendarToDelete.id)));
       removeCreatedCalendarForCurrentUser(calendarToDelete.id);
       setCalendarToDelete(null);
@@ -85,6 +83,7 @@ function LandingPage() {
       await Promise.all(myEvents.map((event) => deleteEvent(event.id)));
       await removeUserFromCalendar(calendarToLeave.id, currentUserId);
 
+      removeCalendarDisplay(calendarToLeave.join_code);
       setMyCalendars((prev) => prev.filter((calendar) => Number(calendar.id) !== Number(calendarToLeave.id)));
       setCalendarToLeave(null);
     } catch (error) {
@@ -126,7 +125,6 @@ function LandingPage() {
   const landingNavItems = [
     ...(currentUserId
       ? [
-          { label: "Customize Profile", onClick: () => navigate("/profile") },
           {
             label: "Sign Out",
             variant: "primary",
@@ -135,7 +133,6 @@ function LandingPage() {
               window.localStorage.removeItem("insync-user-email");
               setCurrentUserId(null);
               setCurrentUserEmail("");
-              setCurrentUsername("");
               setMyCalendars([]);
             },
           },
@@ -210,7 +207,7 @@ function LandingPage() {
          <div className="flex flex-col items-center justify-center gap-5">
             <h2 className="text-4xl font-medium">
               {currentUserId
-                ? `Welcome to InSync Calendar, ${currentUsername || currentUserEmail.split("@")[0] || "there"}!`
+                ? `Welcome to InSync Calendar, ${currentUserEmail.split("@")[0] || "there"}!`
                 : "Welcome to InSync Calendar"}
             </h2>
             <p className="text-gray-700">

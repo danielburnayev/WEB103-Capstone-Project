@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
 import { addUserToCalendar, getUsersInCalendar } from "../services/calendarUsersAPI.jsx";
+import { getCalendarDisplay } from "../services/calendarDisplayStorage.js";
 
 function CreateCalendar({ onClose }) {
   const navigate = useNavigate();
@@ -54,26 +55,27 @@ function CreateCalendar({ onClose }) {
 
       const currentUserId = Number(window.localStorage.getItem("insync-user-id"));
       const currentUserEmail = window.localStorage.getItem("insync-user-email") ?? "";
-      const lastUsedColor = window.localStorage.getItem("insync-last-color") ?? "#3b82f6";
+      const codeToUse = createdCalendar?.join_code || joinCode;
+      const displayForCalendar = getCalendarDisplay(codeToUse);
+      const derivedUsername = (
+        displayForCalendar?.username ||
+        currentUserEmail.split("@")[0] ||
+        "You"
+      ).slice(0, 50);
+      const derivedColor = displayForCalendar?.color || "#3b82f6";
       const createdCalendarId = createdCalendar?.id;
 
       if (Number.isInteger(currentUserId) && currentUserId > 0 && createdCalendarId) {
         const existingMembers = await getUsersInCalendar(createdCalendarId);
         const isAlreadyMember = existingMembers.some((member) => Number(member.user_id) === currentUserId);
         if (!isAlreadyMember) {
-          const lastUsedUsername = window.localStorage.getItem("insync-last-username") ?? "";
-          const derivedUsername = (lastUsedUsername || currentUserEmail.split("@")[0] || "You").slice(0, 50);
           await addUserToCalendar(createdCalendarId, {
             user_id: currentUserId,
             username: derivedUsername,
-            color: lastUsedColor,
+            color: derivedColor,
           });
-          window.localStorage.setItem("insync-last-username", derivedUsername);
-          window.localStorage.setItem("insync-last-color", lastUsedColor);
         }
       }
-
-      const codeToUse = createdCalendar?.join_code || joinCode;
       try {
         await navigator.clipboard.writeText(codeToUse);
       } catch {

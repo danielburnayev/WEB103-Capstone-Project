@@ -3,15 +3,16 @@ import Calendar from "../components/Calendar.jsx";
 import Button from "../components/Button.jsx";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { getAllCalendars } from "../services/calendarsAPI.jsx";
+import { getUsersInCalendar } from "../services/calendarUsersAPI.jsx";
+import { getCalendarDisplay } from "../services/calendarDisplayStorage.js";
 
 export default function SharedCalendarPage() {
     const { code } = useParams();
     const { state } = useLocation();
     const navigate = useNavigate();
-    const savedUsername = window.localStorage.getItem("insync-last-username") ?? "";
-    const savedColor = window.localStorage.getItem("insync-last-color") ?? "#3b82f6";
-    const username = state?.username ?? (savedUsername || "Guest");
-    const color = state?.color ?? savedColor;
+    const [username, setUsername] = useState(state?.username ?? "Guest");
+    const [color, setColor] = useState(state?.color ?? "#3b82f6");
     const [eventActionMode, setEventActionMode] = useState("none");
     const [addActionNonce, setAddActionNonce] = useState(0);
     const [calendarViewMode, setCalendarViewMode] = useState("week");
@@ -23,6 +24,68 @@ export default function SharedCalendarPage() {
         const timeoutId = window.setTimeout(() => setShowCreatedToast(false), 2500);
         return () => window.clearTimeout(timeoutId);
     }, [state?.joinCodeCopied]);
+
+    useEffect(() => {
+        if (state?.username) {
+            setUsername(state.username);
+        }
+        if (state?.color) {
+            setColor(state.color);
+        }
+    }, [state?.username, state?.color]);
+
+    useEffect(() => {
+        const joinKey = `${code || ""}`.trim().toUpperCase();
+        if (!joinKey) return;
+
+        if (state?.username) {
+            return;
+        }
+
+        const local = getCalendarDisplay(joinKey);
+        if (local && (local.username || local.color)) {
+            if (local.username) setUsername(local.username);
+            if (local.color) setColor(local.color);
+            if (local.username) return;
+        }
+
+        const userId = Number(window.localStorage.getItem("insync-user-id"));
+        if (!Number.isInteger(userId) || userId <= 0) {
+            setUsername("Guest");
+            setColor("#3b82f6");
+            return;
+        }
+
+        let cancelled = false;
+        async function loadMembershipDisplay() {
+            try {
+                const calendars = await getAllCalendars();
+                const matched = calendars.find(
+                    (c) => `${c.join_code}`.toUpperCase() === joinKey
+                );
+                if (!matched?.id || cancelled) return;
+                const members = await getUsersInCalendar(matched.id);
+                const mine = members.find((m) => Number(m.user_id) === userId);
+                if (cancelled) return;
+                if (mine?.username) {
+                    setUsername(mine.username);
+                    if (mine.color) setColor(mine.color);
+                } else {
+                    setUsername("Guest");
+                    setColor("#3b82f6");
+                }
+            } catch {
+                if (!cancelled) {
+                    setUsername("Guest");
+                    setColor("#3b82f6");
+                }
+            }
+        }
+        loadMembershipDisplay();
+        return () => {
+            cancelled = true;
+        };
+    }, [code, state?.username]);
 
     function handleAddEvent() {
         setEventActionMode("none");
