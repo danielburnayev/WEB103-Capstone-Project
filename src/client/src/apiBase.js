@@ -1,5 +1,5 @@
 const base = (
-  import.meta.env.VITE_API_URL || "https://web103-capstone-project.onrender.com"
+  import.meta.env.VITE_API_URL || "https://web103-capstone-project-1.onrender.com"
 ).replace(/\/$/, "")
 
 export function apiUrl(path) {

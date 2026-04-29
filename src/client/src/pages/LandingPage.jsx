@@ -6,6 +6,7 @@ import { deleteCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
 import { getUsersInCalendar, removeUserFromCalendar } from "../services/calendarUsersAPI.jsx";
 import { deleteEvent } from "../services/eventsAPI.jsx";
 import { removeCalendarDisplay } from "../services/calendarDisplayStorage.js";
+import { apiUrl } from "../apiBase.js";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ function LandingPage() {
     if (!calendarToLeave?.id || !currentUserId) return;
     try {
       setIsLeavingCalendar(true);
-      const eventsResponse = await fetch(`/api/events/calendar/${calendarToLeave.id}`);
+      const eventsResponse = await fetch(apiUrl(`/api/events/calendar/${calendarToLeave.id}`));
       if (!eventsResponse.ok) throw new Error("Failed to load calendar events.");
       const calendarEvents = await eventsResponse.json();
       const myEvents = calendarEvents.filter((event) => Number(event.user_id) === Number(currentUserId));

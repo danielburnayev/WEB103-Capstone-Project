@@ -4,6 +4,7 @@ import { times, daysOfWeek, months } from "../services/calendar-data.js";
 import { createEvent, updateEvent, deleteEvent } from "../services/eventsAPI.jsx";
 import { createCalendar, getAllCalendars } from "../services/calendarsAPI.jsx";
 import { getCalendarDisplay, setCalendarDisplay } from "../services/calendarDisplayStorage.js";
+import { apiUrl } from "../apiBase.js";
 
 const CALENDAR_HEIGHT = 1056;
 const MINUTES_IN_DAY = 1440;
@@ -144,7 +145,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
 
     async function createGuestUserForCalendar() {
         const safeName = (username || "guest").replaceAll(/\s+/g, "-").toLowerCase();
-        const response = await fetch("/api/users", {
+        const response = await fetch(apiUrl("/api/users"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -162,7 +163,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
     async function ensureUserMembership(calendarId, userId) {
         const isLoggedInUser = Boolean(window.localStorage.getItem("insync-user-email"));
         const perCalendar = getCalendarDisplay(code);
-        const existingMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`);
+        const existingMembershipResponse = await fetch(apiUrl(`/api/calendars/${calendarId}/users`));
         if (!existingMembershipResponse.ok) {
             throw new Error("Failed to check calendar membership");
         }
@@ -185,7 +186,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
             "Member"
         ).trim();
         const fallbackColor = color || perCalendar?.color || "#3b82f6";
-        const addMembershipResponse = await fetch(`/api/calendars/${calendarId}/users`, {
+        const addMembershipResponse = await fetch(apiUrl(`/api/calendars/${calendarId}/users`), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -236,7 +237,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
                 let resolvedUserId = null;
 
                 if (Number.isInteger(cachedId) && cachedId > 0) {
-                    const checkUserResponse = await fetch(`/api/users/${cachedId}`);
+                    const checkUserResponse = await fetch(apiUrl(`/api/users/${cachedId}`));
                     if (checkUserResponse.ok) {
                         resolvedUserId = cachedId;
                     }
@@ -290,7 +291,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
         async function loadEvents() {
             if (!calendarId) return;
             try {
-                const response = await fetch(`/api/events/calendar/${calendarId}`);
+                const response = await fetch(apiUrl(`/api/events/calendar/${calendarId}`));
                 if (!response.ok) throw new Error("Failed to load events");
                 const events = await response.json();
                 const grouped = {};
@@ -312,7 +313,7 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
         async function loadMemberColors() {
             if (!calendarId) return;
             try {
-                const response = await fetch(`/api/calendars/${calendarId}/users`);
+                const response = await fetch(apiUrl(`/api/calendars/${calendarId}/users`));
                 if (!response.ok) throw new Error("Failed to load calendar members");
                 const members = await response.json();
                 const nextColors = {};
