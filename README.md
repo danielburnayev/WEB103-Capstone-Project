@@ -7,7 +7,8 @@ Our CodePath WEB103 project
   Gloriele Mendoza,  
   Mario Nolasco Cortez  
 
-🔗 Link to deployed app: TBD
+🔗 Link to deployed app: https://web103-capstone-project-1.onrender.com/
+Video demo: https://youtu.be/0wIhBz_bRzM
 
 ## About
 
