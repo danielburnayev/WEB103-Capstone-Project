@@ -12,9 +12,7 @@ export const getAllCalendars = async () => {
 // get one calendar by ID
 export const getCalendar = async (id) => {
     const response = await fetch(`${API_URL}/${id}`);
-    if (!response.ok) {
-        throw new Error("Failed to fetch calendar");
-    }
+    if (!response.ok) {return {};}
     return response.json();
 };
 

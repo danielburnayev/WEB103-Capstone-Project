@@ -21,7 +21,8 @@ function JoinCalendarPage() {
     const theCalendarJSON = await getCalendar(trimmedPin);
     console.log(theCalendarJSON);
 
-    navigate("/join/profile", { state: { pin } });
+    if (Object.keys(theCalendarJSON).length !== 0) {navigate("/join/profile", { state: { pin } });}
+    else {setError(`Couldn't find shared calendar with pin ${trimmedPin}`);}
   }
 
   return (
@@ -44,9 +45,9 @@ function JoinCalendarPage() {
               placeholder="Calendar PIN"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
-              className={`border border-gray-300 rounded px-4 py-3 text-center text-lg shadow-sm ${error && !pin.trim() ? 'border-red-500 border-2' : ''}`}
+              className={`border border-gray-300 rounded px-4 py-3 text-center text-lg shadow-sm ${error.length > 0 ? 'border-red-500 border-2' : ''}`}
             />
-            {error && !pin.trim() && <p className="text-red-500 text-sm">{error}</p>}
+            {error.length > 0 && <p className="text-red-500 text-sm">{error}</p>}
           </div>
           <button
             type="submit"
