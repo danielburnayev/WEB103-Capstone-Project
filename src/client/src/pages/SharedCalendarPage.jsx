@@ -1,8 +1,7 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CalendarUserSidebar from "../components/CalendarUserSidebar.jsx";
 import Calendar from "../components/Calendar.jsx";
 import Button from "../components/Button.jsx";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { getAllCalendars } from "../services/calendarsAPI.jsx";
 import { getUsersInCalendar } from "../services/calendarUsersAPI.jsx";
