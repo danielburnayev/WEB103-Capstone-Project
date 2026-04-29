@@ -10,11 +10,20 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(express.json())
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-}));
 
-// specifying api path for server to use
+// ✅ FIXED CORS CONFIG
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://web103-capstone-project-1.onrender.com' // 👈 your frontend
+]
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}))
+
+// routes
 app.use('/api/users', userRoutes)
 app.use('/api/calendars', calendarRoutes)
 app.use('/api/calendars', calendarUserRoutes)
@@ -24,6 +33,6 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 }).on('error', (err) => {
   console.error('Server failed to start:', err);
-});
+})
 
 export default app
