@@ -14,6 +14,8 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/calendar/:code" element={<SharedCalendarPage />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/join" element={<JoinCalendarPage />} />
         <Route path="/join/profile" element={<ProfileSetupPage />} />
         <Route path="/profile/:joinCode" element={<ProfileSetupPage />} />

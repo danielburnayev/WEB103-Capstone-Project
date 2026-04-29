@@ -1,7 +1,7 @@
 function Header({ navItems = [] }) {
   return (
     <header className="flex flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-200 mb-30">
-      <span className="text-xl font-bold">InSync Calendar</span>
+      <span className="text-xl font-semibold">InSync Calendar</span>
       <nav className="flex flex-row gap-4">
         {navItems.map((item) => (
           <button

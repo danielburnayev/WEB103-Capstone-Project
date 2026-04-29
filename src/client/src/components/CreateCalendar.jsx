@@ -104,7 +104,7 @@ function CreateCalendar({ onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Create Calendar</h2>
+          <h2 className="text-xl">Create Calendar</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
         </div>
         <input
