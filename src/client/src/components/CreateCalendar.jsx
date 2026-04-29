@@ -23,6 +23,7 @@ function CreateCalendar({ onClose }) {
     }
   }
 
+  // May want to change this to generate a code in the backend
   function generateJoinCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -38,7 +39,8 @@ function CreateCalendar({ onClose }) {
     try {
       setIsCreating(true);
       setError("");
-
+      
+      // Very inefficient, let's just let the backend generate a random code for us
       const existingCalendars = await getAllCalendars();
       const existingCodes = new Set(existingCalendars.map((calendar) => `${calendar.join_code}`.toUpperCase()));
 

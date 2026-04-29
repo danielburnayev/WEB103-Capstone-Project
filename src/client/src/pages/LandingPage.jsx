@@ -139,9 +139,9 @@ function LandingPage() {
         ]
       : [
           { label: "Log In", onClick: () => navigate("/login") },
-          { label: "Sign Up", variant: "primary", onClick: () => navigate("/signup") },
+          { label: "Sign Up", onClick: () => navigate("/signup") },
         ]),
-    { label: "Join Calendar", onClick: () => navigate("/join") },
+    { label: "Join Calendar", variant: "primary", onClick: () => navigate("/join") },
   ];
 
   return (
