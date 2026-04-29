@@ -1,18 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCalendar } from "../services/calendarsAPI.jsx";
 
 function JoinCalendarPage() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  function handleJoinCalendar(e) {
+  async function handleJoinCalendar(e) {
     e.preventDefault();
-    if (!pin.trim()) {
+
+    const trimmedPin = pin.trim();
+    if (!trimmedPin) {
       setError("Please enter a calendar PIN.");
       return;
     }
+
     setError("");
+
+    const theCalendarJSON = await getCalendar(trimmedPin);
+    console.log(theCalendarJSON);
+
     navigate("/join/profile", { state: { pin } });
   }
 

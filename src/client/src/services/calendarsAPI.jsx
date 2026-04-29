@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api/calendars";
+const API_URL = "http://localhost:3000/api/calendars";
 
 // get all calendars
 export const getAllCalendars = async () => {

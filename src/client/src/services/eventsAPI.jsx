@@ -1,4 +1,4 @@
-const API_URL = '/api/events'
+const API_URL = 'http://localhost:3000/api/events'
 
 // get all events
 export const getAllEvents = async () => {

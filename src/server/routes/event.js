@@ -1,12 +1,12 @@
 import express from 'express'
 import { getEventsByCalendar, getEventById, createEvent, updateEvent, deleteEvent } from '../controllers/eventController.js'
 
-const router = express.Router()
+const eventRoutes = express.Router()
 
-router.get('/calendar/:calendar_id', getEventsByCalendar)
-router.get('/:id', getEventById)
-router.post('/', createEvent)
-router.put('/:id', updateEvent)
-router.delete('/:id', deleteEvent)
+eventRoutes.get('/calendar/:calendar_id', getEventsByCalendar)
+eventRoutes.get('/:id', getEventById)
+eventRoutes.post('/', createEvent)
+eventRoutes.put('/:id', updateEvent)
+eventRoutes.delete('/:id', deleteEvent)
 
-export default router
+export default eventRoutes

@@ -1,12 +1,12 @@
 import express from 'express'
 import { getAllUsers, getUserById, createUser, updateUser, deleteUser } from '../controllers/userController.js'
 
-const router = express.Router()
+const userRoutes = express.Router()
 
-router.get('/', getAllUsers)
-router.get('/:id', getUserById)
-router.post('/', createUser)
-router.put('/:id', updateUser)
-router.delete('/:id', deleteUser)
+userRoutes.get('/', getAllUsers)
+userRoutes.get('/:id', getUserById)
+userRoutes.post('/', createUser)
+userRoutes.put('/:id', updateUser)
+userRoutes.delete('/:id', deleteUser)
 
-export default router
+export default userRoutes

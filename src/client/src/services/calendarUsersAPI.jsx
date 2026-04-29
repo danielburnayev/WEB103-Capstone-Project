@@ -1,4 +1,4 @@
-const API_URL = "/api/calendars";
+const API_URL = "http://localhost:3000/api/calendars";
 
 // get all users in a calendar
 export const getUsersInCalendar = async (calendarId) => {
