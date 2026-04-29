@@ -207,8 +207,8 @@ function LandingPage() {
          <div className="flex flex-col items-center justify-center gap-5">
             <h2 className="text-4xl font-medium">
               {currentUserId
-                ? `Welcome to InSync Calendar, ${currentUserEmail.split("@")[0] || "there"}!`
-                : "Welcome to InSync Calendar"}
+                ? `Welcome to InSync Calendar, ${currentUserEmail.split("@")[0] || "guest"}!`
+                : "Welcome to InSync Calendar, guest!"}
             </h2>
             <p className="text-gray-700">
               Plan together, stay in sync, and jump back into your shared calendars quickly.

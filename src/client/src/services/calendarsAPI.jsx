@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:3000/api/calendars";
+import { apiUrl } from "../apiBase.js";
+
+const API_URL = apiUrl("/api/calendars");
 
 // get all calendars
 export const getAllCalendars = async () => {
@@ -9,10 +11,32 @@ export const getAllCalendars = async () => {
     return response.json();
 };
 
-// get one calendar by ID
+// get one calendar by numeric ID
 export const getCalendar = async (id) => {
     const response = await fetch(`${API_URL}/${id}`);
     if (!response.ok) {return {};}
+    return response.json();
+};
+
+/** Resolve a calendar by its 6-character join code (case-insensitive). */
+export const getCalendarByJoinCode = async (joinCode) => {
+    const code = `${joinCode || ""}`.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    const response = await fetch(`${API_URL}/code/${encodeURIComponent(code)}`);
+    if (response.status === 404) {
+        throw new Error(
+            "That PIN doesn't match any calendar. Double-check the code or ask whoever shared it with you."
+        );
+    }
+    if (!response.ok) {
+        let message = "Failed to look up calendar.";
+        try {
+            const body = await response.json();
+            if (typeof body?.error === "string") message = body.error;
+        } catch {
+            /* non-JSON error body */
+        }
+        throw new Error(message);
+    }
     return response.json();
 };
 

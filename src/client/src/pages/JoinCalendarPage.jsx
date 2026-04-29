@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCalendar } from "../services/calendarsAPI.jsx";
+import { getCalendarByJoinCode } from "../services/calendarsAPI.jsx";
 
 function JoinCalendarPage() {
   const [pin, setPin] = useState("");
@@ -10,19 +10,24 @@ function JoinCalendarPage() {
   async function handleJoinCalendar(e) {
     e.preventDefault();
 
-    const trimmedPin = pin.trim();
-    if (!trimmedPin) {
-      setError("Please enter a calendar PIN.");
+    const normalized = pin.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    if (!normalized) {
+      setError("Please enter a calendar code.");
+      return;
+    }
+    if (normalized.length !== 6) {
+      setError("Calendar codes are 6 characters.");
       return;
     }
 
     setError("");
 
-    const theCalendarJSON = await getCalendar(trimmedPin);
-    console.log(theCalendarJSON);
-
-    if (Object.keys(theCalendarJSON).length !== 0) {navigate("/join/profile", { state: { pin } });}
-    else {setError(`Couldn't find shared calendar with pin ${trimmedPin}`);}
+    try {
+      await getCalendarByJoinCode(normalized);
+      navigate("/join/profile", { state: { pin: normalized } });
+    } catch (err) {
+      setError(err.message || "Could not join that calendar.");
+    }
   }
 
   return (
@@ -44,10 +49,16 @@ function JoinCalendarPage() {
               type="text"
               placeholder="Calendar PIN"
               value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className={`border border-gray-300 rounded px-4 py-3 text-center text-lg shadow-sm ${error.length > 0 ? 'border-red-500 border-2' : ''}`}
+              onChange={(e) =>
+                setPin(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))
+              }
+              maxLength={6}
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              className={`border border-gray-300 rounded px-4 py-3 text-center text-lg shadow-sm tracking-widest uppercase ${error ? "border-red-500 border-2" : ""}`}
             />
-            {error.length > 0 && <p className="text-red-500 text-sm">{error}</p>}
+            {error ? <p className="text-red-500 text-sm text-center">{error}</p> : null}
           </div>
           <button
             type="submit"

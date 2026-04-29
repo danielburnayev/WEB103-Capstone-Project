@@ -1,19 +1,17 @@
+import './config/loadEnv.js'
 import express from 'express'
-import dotenv from 'dotenv'
 import cors from 'cors'
 import userRoutes from './routes/user.js'
 import calendarRoutes from './routes/calendar.js'
 import calendarUserRoutes from './routes/calendarUser.js'
 import eventRoutes from './routes/event.js'
 
-dotenv.config()
-
 const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(express.json())
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
 }));
 
 // specifying api path for server to use

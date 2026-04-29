@@ -219,7 +219,10 @@ const Calendar = forwardRef(function Calendar({ code, username, color = "#fcd34d
                 if (!code) throw new Error("Missing calendar code in URL.");
 
                 const calendars = await getAllCalendars();
-                let foundCalendar = calendars.find((calendar) => `${calendar.join_code}` === `${code}`);
+                const codeKey = `${code}`.trim().toUpperCase();
+                let foundCalendar = calendars.find(
+                    (calendar) => `${calendar.join_code}`.trim().toUpperCase() === codeKey
+                );
 
                 if (!foundCalendar) {
                     foundCalendar = await createCalendar({

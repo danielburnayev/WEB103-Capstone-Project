@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getAllCalendars } from "../services/calendarsAPI.jsx";
-import { getUsersInCalendar, updateCalendarUser } from "../services/calendarUsersAPI.jsx";
+import { addUserToCalendar, getUsersInCalendar, updateCalendarUser } from "../services/calendarUsersAPI.jsx";
 import { getCalendarDisplay, setCalendarDisplay } from "../services/calendarDisplayStorage.js";
 
 const colorOptions = [
@@ -83,10 +83,20 @@ function ProfileSetupPage() {
           (c) => `${c.join_code}`.toUpperCase() === joinKey
         );
         if (matched?.id) {
-          await updateCalendarUser(matched.id, userId, {
+          const members = await getUsersInCalendar(matched.id);
+          const alreadyMember = members.some((u) => Number(u.user_id) === userId);
+          const payload = {
             username: trimmedUsername.slice(0, 50),
             color: selectedColor,
-          });
+          };
+          if (alreadyMember) {
+            await updateCalendarUser(matched.id, userId, payload);
+          } else {
+            await addUserToCalendar(matched.id, {
+              user_id: userId,
+              ...payload,
+            });
+          }
         }
       } catch {
         // local display still saved; membership row may sync next visit

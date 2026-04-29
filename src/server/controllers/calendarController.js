@@ -12,6 +12,23 @@ const getAllCalendars = async (req, res) => {
   }
 }
 
+const getCalendarByJoinCode = async (req, res) => {
+  try {
+    const raw = `${req.params.join_code ?? ''}`.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
+    if (raw.length !== 6) {
+      return res.status(400).json({ error: 'Join code must be 6 characters' })
+    }
+    const result = await pool.query(
+      'SELECT * FROM calendars WHERE UPPER(TRIM(join_code)) = $1',
+      [raw]
+    )
+    if (!result.rows.length) return res.status(404).json({ error: 'Calendar not found' })
+    res.json(result.rows[0])
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+}
+
 const getCalendarById = async (req, res) => {
   console.log("entered get calendar");
   
@@ -70,4 +87,4 @@ const deleteCalendar = async (req, res) => {
   }
 }
 
-export { getAllCalendars, getCalendarById, createCalendar, updateCalendar, deleteCalendar }
+export { getAllCalendars, getCalendarByJoinCode, getCalendarById, createCalendar, updateCalendar, deleteCalendar }

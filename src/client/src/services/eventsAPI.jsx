@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000/api/events'
+import { apiUrl } from '../apiBase.js'
+
+const API_URL = apiUrl('/api/events')
 
 // get all events
 export const getAllEvents = async () => {

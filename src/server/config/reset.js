@@ -1,9 +1,6 @@
-import dotenv from 'dotenv'
-import { pool } from '../config/database.js'
-
-dotenv.config()
+import { pool } from './database.js'
 const resetDatabase = async () => {
-  console.log('DB name:', process.env.PGDATABASE)
+  console.log('DB name:', process.env.PGDATABASE || 'postgres (default)')
 
   try {
     await pool.query('BEGIN')
@@ -36,8 +33,8 @@ const resetDatabase = async () => {
     // CALENDAR_USERS (junction table — FK to both users and calendars)
     await pool.query(`
       CREATE TABLE calendar_users (
-        user_id SERIAL REFERENCES users(id) ON DELETE CASCADE,
-        calendar_id SERIAL REFERENCES calendars(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        calendar_id INTEGER NOT NULL REFERENCES calendars(id) ON DELETE CASCADE,
         username VARCHAR(50),
         color VARCHAR(7),
         PRIMARY KEY (user_id, calendar_id)
@@ -48,8 +45,8 @@ const resetDatabase = async () => {
     await pool.query(`
       CREATE TABLE events (
         id SERIAL UNIQUE NOT NULL PRIMARY KEY,
-        user_id SERIAL REFERENCES users(id) ON DELETE CASCADE,
-        calendar_id SERIAL REFERENCES calendars(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        calendar_id INTEGER NOT NULL REFERENCES calendars(id) ON DELETE CASCADE,
         name VARCHAR(25),
         start_time TIMESTAMPTZ,
         end_time TIMESTAMPTZ,

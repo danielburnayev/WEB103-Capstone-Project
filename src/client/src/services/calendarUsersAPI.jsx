@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:3000/api/calendars";
+import { apiUrl } from "../apiBase.js";
+
+const API_URL = apiUrl("/api/calendars");
 
 // get all users in a calendar
 export const getUsersInCalendar = async (calendarId) => {

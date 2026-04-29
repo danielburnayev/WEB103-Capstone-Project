@@ -1,17 +1,16 @@
+import './loadEnv.js'
 import pg from 'pg'
-import dotenv from 'dotenv'
-
-dotenv.config({ path: '../.env' })
 
 const config = {
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  host: process.env.PGHOST,
-  port: process.env.PGPORT,
-  database: process.env.PGDATABASE,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  user: process.env.PGUSER || process.env.USER,
+  password: process.env.PGPASSWORD ?? '',
+  host: process.env.PGHOST || 'localhost',
+  port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
+  database: process.env.PGDATABASE || 'postgres',
+}
+
+if (process.env.PGSSLMODE === 'require' || process.env.PGSSL === 'true') {
+  config.ssl = { rejectUnauthorized: false }
 }
 
 export const pool = new pg.Pool(config)

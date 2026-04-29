@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:3000/api/users";
+import { apiUrl } from "../apiBase.js";
+
+const API_URL = apiUrl("/api/users");
 
 // get all users
 export const getAllUsers = async () => {
