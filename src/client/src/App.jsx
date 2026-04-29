@@ -5,6 +5,8 @@ import JoinCalendarPage from './pages/JoinCalendarPage.jsx'
 import ProfileSetupPage from './pages/ProfileSetupPage.jsx'
 import SignUpPage from './pages/SignUpPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import SignUp from './pages/SignUp.jsx'
+import SignIn from './pages/SignIn.jsx'
 
 function App() {
   return (
